@@ -16,8 +16,15 @@ class Maintenance(commands.Cog):
     async def reload(self, ctx, *, cog: str):
         if(str(ctx.author.id) == owner_id):
             try:
-                self.bot.reload_extension(f"cogs.{cog}")
-                await ctx.send(f'Reloaded {cog}')
+                if(cog == 'all'):
+                    for filename in os.listdir('./cogs'):
+                        if filename.endswith('.py'):
+                            self.bot.unload_extension(f'cogs.{filename[:-3]}')
+                            self.bot.load_extension(f'cogs.{filename[:-3]}')
+                    await ctx.send('Reloaded all cogs.')
+                else:
+                    self.bot.reload_extension(f"cogs.{cog}")
+                    await ctx.send(f'Reloaded {cog}')
             except Exception as error:
                 await ctx.send(f'Error: {error}')
         else:
@@ -50,8 +57,6 @@ class Maintenance(commands.Cog):
     @commands.command(name='list')
     @commands.has_permissions(administrator=True)
     async def list(self, ctx):
-        print(owner_id)
-        print(ctx.author.id)
         if(str(ctx.author.id) == owner_id):
             cogs = [c.replace('.py', '') for c in os.listdir('./cogs') if c.endswith('.py')]
             await ctx.send(f'Loaded cogs: {", ".join(cogs)}')

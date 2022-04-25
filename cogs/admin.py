@@ -63,5 +63,15 @@ class ServerAdmin(commands.Cog):
         else:
             await ctx.send("You don't have permission to do that.")
     
+    @commands.command(name='unmute')
+    @commands.has_permissions(administrator=True)
+    async def unmute(self, ctx, member: discord.Member, *, reason=None):
+        if ctx.author.guild_permissions.administrator:
+            role = discord.utils.get(ctx.guild.roles, name='Muted')
+            await member.remove_roles(role, reason=reason)
+            await ctx.send(f'Unmuted {member.mention}')
+        else:
+            await ctx.send("You don't have permission to do that.")
+    
 def setup(bot):
     bot.add_cog(ServerAdmin(bot))
