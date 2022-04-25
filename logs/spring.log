@@ -109,3 +109,36 @@
 2022-04-25 19:50:48.163  INFO 165 --- [XNIO-1 I/O-9] lavalink.server.io.SocketServer          : {"op": "configureResuming", "key": "music-node", "timeout": 60}
 2022-04-25 20:00:54.010  INFO 165 --- [XNIO-1 I/O-9] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:61101 with status CloseStatus[code=1006, reason=] -- Session can be resumed within the next 60 seconds with key music-node
 2022-04-25 20:01:54.016  INFO 165 --- [pool-1-thread-1] lavalink.server.io.SocketContext         : Shutting down 0 playing players.
+2022-04-25 20:07:29.449  INFO 165 --- [XNIO-1 task-2] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:61334
+2022-04-25 20:07:29.451  INFO 165 --- [XNIO-1 task-2] lavalink.server.io.SocketServer          : Connection successfully established from Lavalink.py
+2022-04-25 20:07:29.451  INFO 165 --- [XNIO-1 I/O-2] lavalink.server.io.SocketServer          : {"op": "configureResuming", "key": "music-node", "timeout": 60}
+2022-04-25 20:46:20.077  INFO 165 --- [XNIO-1 I/O-2] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:61334 with status CloseStatus[code=1006, reason=] -- Session can be resumed within the next 60 seconds with key music-node
+2022-04-25 20:46:23.852  INFO 165 --- [XNIO-1 task-3] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:59482
+2022-04-25 20:46:23.854  INFO 165 --- [XNIO-1 task-3] lavalink.server.io.SocketServer          : Connection successfully established from Lavalink.py
+2022-04-25 20:46:23.855  INFO 165 --- [XNIO-1 I/O-10] lavalink.server.io.SocketServer          : {"op": "configureResuming", "key": "music-node", "timeout": 60}
+2022-04-25 20:46:43.031  WARN 165 --- [XNIO-1 I/O-10] lavalink.server.io.SocketServer          : Shutdown resumable session with key music-node because it has the same key as a newly disconnected resumable session.
+2022-04-25 20:46:43.032  INFO 165 --- [XNIO-1 I/O-10] lavalink.server.io.SocketContext         : Shutting down 0 playing players.
+2022-04-25 20:46:43.032  INFO 165 --- [XNIO-1 I/O-10] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:59482 with status CloseStatus[code=1006, reason=] -- Session can be resumed within the next 60 seconds with key music-node
+2022-04-25 20:46:46.552  INFO 165 --- [XNIO-1 task-4] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:59488
+2022-04-25 20:46:46.555  INFO 165 --- [XNIO-1 task-4] lavalink.server.io.SocketServer          : Connection successfully established from Lavalink.py
+2022-04-25 20:46:46.555  INFO 165 --- [XNIO-1 I/O-4] lavalink.server.io.SocketServer          : {"op": "configureResuming", "key": "music-node", "timeout": 60}
+2022-04-25 20:47:20.082  INFO 165 --- [pool-2-thread-1] lavalink.server.io.SocketContext         : Shutting down 0 playing players.
+2022-04-25 20:47:43.034  INFO 165 --- [pool-3-thread-1] lavalink.server.io.SocketContext         : Shutting down 0 playing players.
+2022-04-25 20:50:02.701  INFO 165 --- [XNIO-1 I/O-4] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:59488 with status CloseStatus[code=1006, reason=] -- Session can be resumed within the next 60 seconds with key music-node
+2022-04-25 20:50:06.235  INFO 165 --- [XNIO-1 task-5] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:59545
+2022-04-25 20:50:06.237  INFO 165 --- [XNIO-1 task-5] lavalink.server.io.SocketServer          : Connection successfully established from Lavalink.py
+2022-04-25 20:50:06.238  INFO 165 --- [XNIO-1 I/O-1] lavalink.server.io.SocketServer          : {"op": "configureResuming", "key": "music-node", "timeout": 60}
+2022-04-25 20:50:49.835  WARN 165 --- [XNIO-1 I/O-1] lavalink.server.io.SocketServer          : Shutdown resumable session with key music-node because it has the same key as a newly disconnected resumable session.
+2022-04-25 20:50:49.835  INFO 165 --- [XNIO-1 I/O-1] lavalink.server.io.SocketContext         : Shutting down 0 playing players.
+2022-04-25 20:50:49.835  INFO 165 --- [XNIO-1 I/O-1] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:59545 with status CloseStatus[code=1006, reason=] -- Session can be resumed within the next 60 seconds with key music-node
+2022-04-25 20:50:53.271  INFO 165 --- [XNIO-1 task-6] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:59560
+2022-04-25 20:50:53.274  INFO 165 --- [XNIO-1 task-6] lavalink.server.io.SocketServer          : Connection successfully established from Lavalink.py
+2022-04-25 20:50:53.274  INFO 165 --- [XNIO-1 I/O-4] lavalink.server.io.SocketServer          : {"op": "configureResuming", "key": "music-node", "timeout": 60}
+2022-04-25 20:51:02.716  INFO 165 --- [pool-4-thread-1] lavalink.server.io.SocketContext         : Shutting down 0 playing players.
+2022-04-25 20:51:20.446  INFO 165 --- [XNIO-1 I/O-4] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:59560 with status CloseStatus[code=1006, reason=] -- Session can be resumed within the next 60 seconds with key music-node
+2022-04-25 20:51:24.056  INFO 165 --- [XNIO-1 task-7] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:59571
+2022-04-25 20:51:24.058  INFO 165 --- [XNIO-1 task-7] lavalink.server.io.SocketServer          : Connection successfully established from Lavalink.py
+2022-04-25 20:51:24.058  INFO 165 --- [XNIO-1 I/O-3] lavalink.server.io.SocketServer          : {"op": "configureResuming", "key": "music-node", "timeout": 60}
+2022-04-25 20:51:49.843  INFO 165 --- [pool-5-thread-1] lavalink.server.io.SocketContext         : Shutting down 0 playing players.
+2022-04-25 20:52:20.450  INFO 165 --- [pool-6-thread-1] lavalink.server.io.SocketContext         : Shutting down 0 playing players.
+2022-04-25 20:53:02.425  INFO 165 --- [XNIO-1 I/O-3] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:59571 with status CloseStatus[code=1006, reason=] -- Session can be resumed within the next 60 seconds with key music-node

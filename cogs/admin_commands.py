@@ -3,6 +3,9 @@ import discord
 from discord.ext import commands
 from discord import utils
 import os
+from decouple import config
+
+owner_id = config('OWNER_ID')
 
 class Maintenance(commands.Cog):
     def __init__(self, bot):
@@ -11,7 +14,7 @@ class Maintenance(commands.Cog):
     @commands.command(name='reload')
     @commands.has_permissions(administrator=True)
     async def reload(self, ctx, *, cog: str):
-        if(ctx.author.id == self.bot.owner_id):
+        if(str(ctx.author.id) == owner_id):
             try:
                 self.bot.reload_extension(f"cogs.{cog}")
                 await ctx.send(f'Reloaded {cog}')
@@ -23,7 +26,7 @@ class Maintenance(commands.Cog):
     @commands.command(name='load')
     @commands.has_permissions(administrator=True)
     async def load(self, ctx, *, cog: str):
-        if(ctx.author.id == self.bot.owner_id):
+        if(str(ctx.author.id) == owner_id):
             try:
                 self.bot.load_extension(f"cogs.{cog}")
                 await ctx.send(f'Loaded {cog}')
@@ -35,7 +38,7 @@ class Maintenance(commands.Cog):
     @commands.command(name='unload')
     @commands.has_permissions(administrator=True)
     async def unload(self, ctx, *, cog: str):
-        if(ctx.author.id == self.bot.owner_id):
+        if(str(ctx.author.id) == owner_id):
             try:
                 self.bot.unload_extension(f"cogs.{cog}")
                 await ctx.send(f'Unloaded {cog}')
@@ -47,7 +50,9 @@ class Maintenance(commands.Cog):
     @commands.command(name='list')
     @commands.has_permissions(administrator=True)
     async def list(self, ctx):
-        if(ctx.author.id == self.bot.owner_id):
+        print(owner_id)
+        print(ctx.author.id)
+        if(str(ctx.author.id) == owner_id):
             cogs = [c.replace('.py', '') for c in os.listdir('./cogs') if c.endswith('.py')]
             await ctx.send(f'Loaded cogs: {", ".join(cogs)}')
         else:

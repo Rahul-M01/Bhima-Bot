@@ -26,5 +26,9 @@ class Members(commands.Cog):
     async def hello(ctx):
         await ctx.send('Hello!')
 
+    # @commands.command(name='help')
+    # async def help(ctx):
+
+
 def setup(bot):
     bot.add_cog(Members(bot))
