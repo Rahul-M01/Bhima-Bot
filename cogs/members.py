@@ -1,3 +1,4 @@
+import asyncio
 import re
 import discord
 from discord.ext import commands
@@ -18,17 +19,19 @@ class Members(commands.Cog):
         return quote
     
     @commands.command(name='quote')
-    async def quote(ctx):
+    async def quote(self, ctx):
         quote = Members.get_quote()
         await ctx.send("```{0}```".format(quote))
 
     @commands.command(name='hello')
-    async def hello(ctx):
+    async def hello(self, ctx):
         await ctx.send('Hello!')
 
-    # @commands.command(name='help')
-    # async def help(ctx):
-
-
+    @commands.command(name='reminder')
+    async def reminder(self, ctx, time: str, reminder):
+        await ctx.send('Reminder set!')
+        await asyncio.sleep(int(time))
+        await ctx.author.send(reminder)
+        
 def setup(bot):
     bot.add_cog(Members(bot))

@@ -9,6 +9,7 @@ from decouple import config
 
 API_key = API_USERNAME = config('API_key')
 intents = discord.Intents.default()
+intents.members = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 owner_id = config('OWNER_ID')
 
