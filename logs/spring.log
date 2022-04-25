@@ -108,3 +108,4 @@
 2022-04-25 19:50:48.152  INFO 165 --- [XNIO-1 task-1] lavalink.server.io.SocketServer          : Connection successfully established from Lavalink.py
 2022-04-25 19:50:48.163  INFO 165 --- [XNIO-1 I/O-9] lavalink.server.io.SocketServer          : {"op": "configureResuming", "key": "music-node", "timeout": 60}
 2022-04-25 20:00:54.010  INFO 165 --- [XNIO-1 I/O-9] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:61101 with status CloseStatus[code=1006, reason=] -- Session can be resumed within the next 60 seconds with key music-node
+2022-04-25 20:01:54.016  INFO 165 --- [pool-1-thread-1] lavalink.server.io.SocketContext         : Shutting down 0 playing players.
