@@ -1,7 +1,6 @@
 import os
 import discord
 from discord.ext import commands
-import requests
 import json
 # from perspective import PerspectiveAPI
 from googleapiclient import discovery
@@ -13,15 +12,6 @@ intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 
-
-
-def get_quote():
-    response = requests.get("https://zenquotes.io/api/random")
-    json_data = json.loads(response.text)
-    quote = json_data[0]["q"] + "\n~" + json_data[0]["a"]
-    return quote
-
-
 @bot.event
 async def on_ready():
     for file in os.listdir("./cogs"):
@@ -30,16 +20,6 @@ async def on_ready():
     print('Logged in succesfully.')
   
 
-
-@bot.command()
-async def hello(ctx):
-    await ctx.send('Hello!')
-
-
-@bot.command()
-async def quote(ctx):
-    quote = get_quote()
-    await ctx.send("```{0}```".format(quote))
 
 
 # @client.event
