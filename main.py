@@ -6,7 +6,6 @@ import json
 # from perspective import PerspectiveAPI
 from googleapiclient import discovery
 from discord.ext.commands import has_permissions, MissingPermissions
-import music
 from decouple import config
 
 API_key = API_USERNAME = config('API_key')
@@ -25,9 +24,10 @@ def get_quote():
 
 @bot.event
 async def on_ready():
-    bot.load_extension('music')
+    for file in os.listdir("./cogs"):
+        if file.endswith(".py"):
+            bot.load_extension(f"cogs.{file[:-3]}")
     print('Logged in succesfully.')
-    print(intents)
   
 
 

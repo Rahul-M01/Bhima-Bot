@@ -66,11 +66,8 @@ class songs(commands.Cog):
     @commands.command(name='resume')
     async def resume(self, ctx):
         player = self.bot.music.player_manager.get(ctx.guild.id)
-        if not player.is_playing:
-            await player.set_pause(False)
-            await ctx.send('Music resumed.')
-        else:
-            await ctx.send('Music is already playing.')
+        await player.set_pause(False)
+        await ctx.send('Music resumed.')
     
     @commands.command(name='stop')
     async def stop(self, ctx):
@@ -105,7 +102,7 @@ class songs(commands.Cog):
     async def lower(self, ctx):
         player = self.bot.music.player_manager.get(ctx.guild.id)
         if player.is_playing:
-            await player.set_volume(player.volume - 25)
+            await player.set_volume(player.volume - 50)
             await ctx.send('Volume lowered.')
         else:
             await ctx.send('Music is not playing.')
@@ -114,7 +111,7 @@ class songs(commands.Cog):
     async def higher(self, ctx):
         player = self.bot.music.player_manager.get(ctx.guild.id)
         if player.is_playing:
-            await player.set_volume(player.volume + 25)
+            await player.set_volume(player.volume + 50)
             await ctx.send('Volume higher.')
         else:
             await ctx.send('Music is not playing.')
