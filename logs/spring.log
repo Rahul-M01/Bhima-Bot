@@ -1,4 +1,4 @@
-2022-04-25 19:07:51.184  INFO 94 --- [main] lavalink.server.Launcher                 : 
+2022-04-25 19:39:58.518  INFO 384 --- [main] lavalink.server.Launcher                 : 
 
 [32m       .  [31m _                  _ _       _    [32m__ _ _
 [32m      /\\ [31m| | __ ___   ____ _| (_)_ __ | | __[32m\ \ \ \
@@ -16,7 +16,7 @@
 	JVM:            11.0.13
 	Lavaplayer      1.3.96-original
 
-2022-04-25 19:07:51.228  INFO 94 --- [main] o.s.boot.SpringApplication               : 
+2022-04-25 19:39:58.544  INFO 384 --- [main] o.s.boot.SpringApplication               : 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
 ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
@@ -26,151 +26,28 @@
 [32m :: Spring Boot :: [39m      [2m (v2.1.8.RELEASE)[0;39m
 
 
-2022-04-25 19:07:51.310  INFO 94 --- [main] lavalink.server.Launcher                 : Starting Launcher on DESKTOP-BUO1M60 with PID 94 (/mnt/c/Users/Rahul/Desktop/discord bt/Lavalink.jar started by rahul in /mnt/c/Users/Rahul/Desktop/discord bt)
-2022-04-25 19:07:51.310  INFO 94 --- [main] lavalink.server.Launcher                 : No active profile set, falling back to default profiles: default
-2022-04-25 19:07:51.353  WARN 94 --- [background-preinit] o.s.h.c.j.Jackson2ObjectMapperBuilder    : For Jackson Kotlin classes support please add "com.fasterxml.jackson.module:jackson-module-kotlin" to the classpath
-2022-04-25 19:07:52.045  WARN 94 --- [main] io.undertow.websockets.jsr               : UT026010: Buffer pool was not set on WebSocketDeploymentInfo, the default pool will be used
-2022-04-25 19:07:52.063  INFO 94 --- [main] io.undertow.servlet                      : Initializing Spring embedded WebApplicationContext
-2022-04-25 19:07:52.063  INFO 94 --- [main] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 723 ms
-2022-04-25 19:07:52.323  WARN 94 --- [main] l.server.config.SentryConfiguration      : Turning off sentry
-2022-04-25 19:07:52.605  INFO 94 --- [main] c.s.d.l.tools.GarbageCollectionMonitor   : GC monitoring enabled, reporting results every 2 minutes.
-2022-04-25 19:07:52.771  INFO 94 --- [main] lavalink.server.config.KoeConfiguration  : OS: Linux, Arch: amd64
-2022-04-25 19:07:52.772  INFO 94 --- [main] lavalink.server.config.KoeConfiguration  : Enabling JDA-NAS
-2022-04-25 19:07:52.776  INFO 94 --- [main] c.s.l.c.natives.NativeLibraryLoader      : Native library udpqueue: loading with filter null
-2022-04-25 19:07:52.785  INFO 94 --- [main] c.s.l.c.natives.NativeLibraryLoader      : Native library udpqueue: successfully loaded.
-2022-04-25 19:07:52.953  INFO 94 --- [main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'applicationTaskExecutor'
-2022-04-25 19:07:53.157  INFO 94 --- [main] org.xnio                                 : XNIO version 3.3.8.Final
-2022-04-25 19:07:53.165  INFO 94 --- [main] org.xnio.nio                             : XNIO NIO Implementation Version 3.3.8.Final
-2022-04-25 19:07:53.215  INFO 94 --- [main] o.s.b.w.e.u.UndertowServletWebServer     : Undertow started on port(s) 2333 (http) with context path ''
-2022-04-25 19:07:53.219  INFO 94 --- [main] lavalink.server.Launcher                 : Started Launcher in 2.415 seconds (JVM running for 2.93)
-2022-04-25 19:07:53.219  INFO 94 --- [main] lavalink.server.Launcher                 : You can safely ignore the big red warning about illegal reflection. See https://github.com/freyacodes/Lavalink/issues/295
-2022-04-25 19:08:40.142  INFO 94 --- [XNIO-1 task-1] io.undertow.servlet                      : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2022-04-25 19:08:40.143  INFO 94 --- [XNIO-1 task-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2022-04-25 19:08:40.146  INFO 94 --- [XNIO-1 task-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms
-2022-04-25 19:08:40.159  INFO 94 --- [XNIO-1 task-1] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:63676
-2022-04-25 19:08:40.201  INFO 94 --- [XNIO-1 task-1] lavalink.server.io.SocketServer          : Connection successfully established from Lavalink.py
-2022-04-25 19:08:40.212  INFO 94 --- [XNIO-1 I/O-4] lavalink.server.io.SocketServer          : {"op": "configureResuming", "key": "music-node", "timeout": 60}
-2022-04-25 19:08:50.156  INFO 94 --- [XNIO-1 I/O-4] lavalink.server.io.SocketServer          : {"op": "voiceUpdate", "guildId": "763118659476127794", "sessionId": "356f5923f28d3c9adffc0bc9ff3e8159", "event": {"token": "2bef33bb87c2720c", "guild_id": "763118659476127794", "endpoint": "rotterdam7347.discord.media:443"}}
-2022-04-25 19:08:50.636  WARN 94 --- [nioEventLoopGroup-2-1] io.netty.bootstrap.Bootstrap             : Failed to set channel option 'IP_TOS' with value '24' for channel '[id: 0x17e9f3fb]'
-
-io.netty.channel.ChannelException: java.net.SocketException: Operation not permitted
-	at io.netty.channel.socket.DefaultDatagramChannelConfig.setTrafficClass(DefaultDatagramChannelConfig.java:358) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.channel.socket.DefaultDatagramChannelConfig.setOption(DefaultDatagramChannelConfig.java:130) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.channel.socket.nio.NioDatagramChannelConfig.setOption(NioDatagramChannelConfig.java:216) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.bootstrap.AbstractBootstrap.setChannelOption(AbstractBootstrap.java:451) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.bootstrap.AbstractBootstrap.setChannelOptions(AbstractBootstrap.java:443) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.bootstrap.Bootstrap.init(Bootstrap.java:265) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.bootstrap.AbstractBootstrap.initAndRegister(AbstractBootstrap.java:311) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.bootstrap.Bootstrap.doResolveAndConnect(Bootstrap.java:155) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.bootstrap.Bootstrap.connect(Bootstrap.java:139) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at moe.kyokobot.koe.internal.handler.DiscordUDPConnection.connect(DiscordUDPConnection.java:60) ~[core-1.0.1.jar!/:na]
-	at moe.kyokobot.koe.gateway.VoiceGatewayV4Connection.selectProtocol(VoiceGatewayV4Connection.java:150) ~[core-1.0.1.jar!/:na]
-	at moe.kyokobot.koe.gateway.VoiceGatewayV4Connection.handlePayload(VoiceGatewayV4Connection.java:77) ~[core-1.0.1.jar!/:na]
-	at moe.kyokobot.koe.gateway.AbstractVoiceGatewayConnection$WebSocketClientHandler.channelRead0(AbstractVoiceGatewayConnection.java:182) ~[core-1.0.1.jar!/:na]
-	at io.netty.channel.SimpleChannelInboundHandler.channelRead(SimpleChannelInboundHandler.java:99) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:321) ~[netty-codec-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:295) ~[netty-codec-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.handler.ssl.SslHandler.unwrap(SslHandler.java:1486) ~[netty-handler-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.handler.ssl.SslHandler.decodeJdkCompatible(SslHandler.java:1235) ~[netty-handler-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.handler.ssl.SslHandler.decode(SslHandler.java:1282) ~[netty-handler-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.handler.codec.ByteToMessageDecoder.decodeRemovalReentryProtection(ByteToMessageDecoder.java:498) ~[netty-codec-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.handler.codec.ByteToMessageDecoder.callDecode(ByteToMessageDecoder.java:437) ~[netty-codec-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:276) ~[netty-codec-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1410) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:379) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:365) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:919) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:163) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:714) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:650) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:576) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:493) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:989) ~[netty-common-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) ~[netty-common-4.1.48.Final.jar!/:4.1.48.Final]
-	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) ~[netty-common-4.1.48.Final.jar!/:4.1.48.Final]
-	at java.base/java.lang.Thread.run(Thread.java:829) ~[na:na]
-Caused by: java.net.SocketException: Operation not permitted
-	at java.base/sun.nio.ch.Net.setIntOption0(Native Method) ~[na:na]
-	at java.base/sun.nio.ch.Net.setSocketOption(Net.java:372) ~[na:na]
-	at java.base/sun.nio.ch.DatagramChannelImpl.setOption(DatagramChannelImpl.java:236) ~[na:na]
-	at java.base/sun.nio.ch.DatagramSocketAdaptor.setIntOption(DatagramSocketAdaptor.java:273) ~[na:na]
-	at java.base/sun.nio.ch.DatagramSocketAdaptor.setTrafficClass(DatagramSocketAdaptor.java:335) ~[na:na]
-	at io.netty.channel.socket.DefaultDatagramChannelConfig.setTrafficClass(DefaultDatagramChannelConfig.java:356) ~[netty-transport-4.1.48.Final.jar!/:4.1.48.Final]
-	... 43 common frames omitted
-
-2022-04-25 19:08:53.708  INFO 94 --- [XNIO-1 task-2] l.server.player.AudioLoaderRestHandler   : Got request to load for identifier "ytsearch:naruto theme"
-2022-04-25 19:08:54.426  INFO 94 --- [lava-daemon-pool-info-loader-2-thread-1] lavalink.server.player.AudioLoader       : Loaded playlist Search results for: naruto theme
-2022-04-25 19:08:56.387  INFO 94 --- [XNIO-1 I/O-4] lavalink.server.io.SocketServer          : {"op": "play", "guildId": "763118659476127794", "track": "QAAAiAIAHE5hcnV0byAtIE5hcnV0bydzIFRoZW1lIHNvbmcAEmtha2FzaGlhbmRzaGlrYW1hcgAAAAAABB6wAAtqcVhVbTJZUy1tTQABACtodHRwczovL3d3dy55b3V0dWJlLmNvbS93YXRjaD92PWpxWFVtMllTLW1NAAd5b3V0dWJlAAAAAAAAAAA=", "startTime": 0, "endTime": 0, "noReplace": false}
-2022-04-25 19:09:00.351  INFO 94 --- [XNIO-1 I/O-4] lavalink.server.io.SocketServer          : {"op": "pause", "guildId": "763118659476127794", "pause": true}
-2022-04-25 19:09:03.041  INFO 94 --- [XNIO-1 I/O-4] lavalink.server.io.SocketServer          : {"op": "pause", "guildId": "763118659476127794", "pause": false}
-2022-04-25 19:09:08.493  INFO 94 --- [XNIO-1 I/O-4] lavalink.server.io.SocketServer          : {"op": "pause", "guildId": "763118659476127794", "pause": false}
-2022-04-25 19:09:12.521  INFO 94 --- [XNIO-1 I/O-4] lavalink.server.io.SocketServer          : {"op": "volume", "guildId": "763118659476127794", "volume": 75}
-2022-04-25 19:09:12.524  INFO 94 --- [lava-daemon-pool-playback-1-thread-1] c.s.l.c.natives.NativeLibraryLoader      : Native library libmpg123-0: loading with filter com.sedmelluq.discord.lavaplayer.natives.ConnectorNativeLibLoader$$Lambda$612/0x00000008406fec40@23ff3106
-2022-04-25 19:09:12.524  INFO 94 --- [lava-daemon-pool-playback-1-thread-1] c.s.l.c.natives.NativeLibraryLoader      : Native library connector: loading with filter null
-2022-04-25 19:09:12.556  INFO 94 --- [lava-daemon-pool-playback-1-thread-1] c.s.l.c.natives.NativeLibraryLoader      : Native library connector: successfully loaded.
-2022-04-25 19:09:15.139  INFO 94 --- [XNIO-1 I/O-4] lavalink.server.io.SocketServer          : {"op": "volume", "guildId": "763118659476127794", "volume": 50}
-2022-04-25 19:13:29.764  INFO 94 --- [XNIO-1 I/O-4] lavalink.server.io.SocketServer          : {"op": "stop", "guildId": "763118659476127794"}
-2022-04-25 19:13:45.367  INFO 94 --- [XNIO-1 I/O-4] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:63676 with status CloseStatus[code=1006, reason=] -- Session can be resumed within the next 60 seconds with key music-node
-2022-04-25 19:13:48.929  INFO 94 --- [XNIO-1 task-4] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:64515
-2022-04-25 19:13:48.932  INFO 94 --- [XNIO-1 task-4] lavalink.server.io.SocketServer          : Connection successfully established from Lavalink.py
-2022-04-25 19:13:48.933  INFO 94 --- [XNIO-1 I/O-3] lavalink.server.io.SocketServer          : {"op": "configureResuming", "key": "music-node", "timeout": 60}
-2022-04-25 19:14:45.378  INFO 94 --- [pool-2-thread-1] lavalink.server.io.SocketContext         : Shutting down 0 playing players.
-2022-04-25 19:16:33.070  INFO 94 --- [XNIO-1 I/O-3] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:64515 with status CloseStatus[code=1006, reason=] -- Session can be resumed within the next 60 seconds with key music-node
-2022-04-25 19:16:36.708  INFO 94 --- [XNIO-1 task-5] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:64556
-2022-04-25 19:16:36.710  INFO 94 --- [XNIO-1 task-5] lavalink.server.io.SocketServer          : Connection successfully established from Lavalink.py
-2022-04-25 19:16:36.710  INFO 94 --- [XNIO-1 I/O-8] lavalink.server.io.SocketServer          : {"op": "configureResuming", "key": "music-node", "timeout": 60}
-2022-04-25 19:16:50.359  WARN 94 --- [XNIO-1 I/O-8] lavalink.server.io.SocketServer          : Shutdown resumable session with key music-node because it has the same key as a newly disconnected resumable session.
-2022-04-25 19:16:50.360  INFO 94 --- [XNIO-1 I/O-8] lavalink.server.io.SocketContext         : Shutting down 0 playing players.
-2022-04-25 19:16:50.360  INFO 94 --- [XNIO-1 I/O-8] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:64556 with status CloseStatus[code=1006, reason=] -- Session can be resumed within the next 60 seconds with key music-node
-2022-04-25 19:16:54.002  INFO 94 --- [XNIO-1 task-6] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:64565
-2022-04-25 19:16:54.003  INFO 94 --- [XNIO-1 task-6] lavalink.server.io.SocketServer          : Connection successfully established from Lavalink.py
-2022-04-25 19:16:54.004  INFO 94 --- [XNIO-1 I/O-5] lavalink.server.io.SocketServer          : {"op": "configureResuming", "key": "music-node", "timeout": 60}
-2022-04-25 19:17:07.851  WARN 94 --- [XNIO-1 I/O-5] lavalink.server.io.SocketServer          : Shutdown resumable session with key music-node because it has the same key as a newly disconnected resumable session.
-2022-04-25 19:17:07.852  INFO 94 --- [XNIO-1 I/O-5] lavalink.server.io.SocketContext         : Shutting down 0 playing players.
-2022-04-25 19:17:07.852  INFO 94 --- [XNIO-1 I/O-5] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:64565 with status CloseStatus[code=1006, reason=] -- Session can be resumed within the next 60 seconds with key music-node
-2022-04-25 19:17:11.792  INFO 94 --- [XNIO-1 task-7] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:64574
-2022-04-25 19:17:11.794  INFO 94 --- [XNIO-1 task-7] lavalink.server.io.SocketServer          : Connection successfully established from Lavalink.py
-2022-04-25 19:17:11.795  INFO 94 --- [XNIO-1 I/O-2] lavalink.server.io.SocketServer          : {"op": "configureResuming", "key": "music-node", "timeout": 60}
-2022-04-25 19:17:33.074  INFO 94 --- [pool-3-thread-1] lavalink.server.io.SocketContext         : Shutting down 0 playing players.
-2022-04-25 19:17:50.374  INFO 94 --- [pool-4-thread-1] lavalink.server.io.SocketContext         : Shutting down 0 playing players.
-2022-04-25 19:18:07.852  INFO 94 --- [pool-5-thread-1] lavalink.server.io.SocketContext         : Shutting down 0 playing players.
-2022-04-25 19:23:05.586  INFO 94 --- [XNIO-1 I/O-2] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:64574 with status CloseStatus[code=1006, reason=] -- Session can be resumed within the next 60 seconds with key music-node
-2022-04-25 19:24:05.597  INFO 94 --- [pool-6-thread-1] lavalink.server.io.SocketContext         : Shutting down 0 playing players.
-2022-04-25 19:24:14.553  INFO 94 --- [XNIO-1 task-8] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:64163
-2022-04-25 19:24:14.555  INFO 94 --- [XNIO-1 task-8] lavalink.server.io.SocketServer          : Connection successfully established from Lavalink.py
-2022-04-25 19:24:14.556  INFO 94 --- [XNIO-1 I/O-11] lavalink.server.io.SocketServer          : {"op": "configureResuming", "key": "music-node", "timeout": 60}
-2022-04-25 19:25:09.545  INFO 94 --- [XNIO-1 I/O-11] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:64163 with status CloseStatus[code=1006, reason=] -- Session can be resumed within the next 60 seconds with key music-node
-2022-04-25 19:25:13.147  INFO 94 --- [XNIO-1 task-9] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:64185
-2022-04-25 19:25:13.149  INFO 94 --- [XNIO-1 task-9] lavalink.server.io.SocketServer          : Connection successfully established from Lavalink.py
-2022-04-25 19:25:13.149  INFO 94 --- [XNIO-1 I/O-9] lavalink.server.io.SocketServer          : {"op": "configureResuming", "key": "music-node", "timeout": 60}
-2022-04-25 19:26:09.557  INFO 94 --- [pool-7-thread-1] lavalink.server.io.SocketContext         : Shutting down 0 playing players.
-2022-04-25 19:27:56.473  INFO 94 --- [XNIO-1 I/O-9] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:64185 with status CloseStatus[code=1006, reason=] -- Session can be resumed within the next 60 seconds with key music-node
-2022-04-25 19:27:59.941  INFO 94 --- [XNIO-1 task-10] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:64256
-2022-04-25 19:27:59.943  INFO 94 --- [XNIO-1 task-10] lavalink.server.io.SocketServer          : Connection successfully established from Lavalink.py
-2022-04-25 19:27:59.943  INFO 94 --- [XNIO-1 I/O-8] lavalink.server.io.SocketServer          : {"op": "configureResuming", "key": "music-node", "timeout": 60}
-2022-04-25 19:28:11.167  INFO 94 --- [XNIO-1 task-11] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:64259
-2022-04-25 19:28:11.169  INFO 94 --- [XNIO-1 task-11] lavalink.server.io.SocketServer          : Connection successfully established from Lavalink.py
-2022-04-25 19:28:11.170  INFO 94 --- [XNIO-1 I/O-11] lavalink.server.io.SocketServer          : {"op": "configureResuming", "key": "music-node", "timeout": 60}
-2022-04-25 19:28:56.477  INFO 94 --- [pool-8-thread-1] lavalink.server.io.SocketContext         : Shutting down 0 playing players.
-2022-04-25 19:35:04.588  INFO 94 --- [XNIO-1 I/O-11] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:64259 with status CloseStatus[code=1006, reason=] -- Session can be resumed within the next 60 seconds with key music-node
-2022-04-25 19:35:04.588  WARN 94 --- [XNIO-1 I/O-8] lavalink.server.io.SocketServer          : Shutdown resumable session with key music-node because it has the same key as a newly disconnected resumable session.
-2022-04-25 19:35:04.588  INFO 94 --- [XNIO-1 I/O-8] lavalink.server.io.SocketContext         : Shutting down 0 playing players.
-2022-04-25 19:35:04.589  INFO 94 --- [XNIO-1 I/O-8] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:64256 with status CloseStatus[code=1006, reason=] -- Session can be resumed within the next 60 seconds with key music-node
-2022-04-25 19:35:08.241  INFO 94 --- [XNIO-1 task-12] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:64303
-2022-04-25 19:35:08.243  INFO 94 --- [XNIO-1 task-12] lavalink.server.io.SocketServer          : Connection successfully established from Lavalink.py
-2022-04-25 19:35:08.243  INFO 94 --- [XNIO-1 I/O-7] lavalink.server.io.SocketServer          : {"op": "configureResuming", "key": "music-node", "timeout": 60}
-2022-04-25 19:35:33.470  WARN 94 --- [XNIO-1 I/O-7] lavalink.server.io.SocketServer          : Shutdown resumable session with key music-node because it has the same key as a newly disconnected resumable session.
-2022-04-25 19:35:33.471  INFO 94 --- [XNIO-1 I/O-7] lavalink.server.io.SocketContext         : Shutting down 0 playing players.
-2022-04-25 19:35:33.471  INFO 94 --- [XNIO-1 I/O-7] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:64303 with status CloseStatus[code=1006, reason=] -- Session can be resumed within the next 60 seconds with key music-node
-2022-04-25 19:35:34.405  INFO 94 --- [Thread-1] o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService 'applicationTaskExecutor'
-2022-04-25 19:35:34.406  INFO 94 --- [Thread-1] c.s.d.l.tools.GarbageCollectionMonitor   : GC monitoring disabled.
-2022-04-25 19:35:34.408  INFO 94 --- [Thread-1] io.undertow.servlet                      : Destroying Spring FrameworkServlet 'dispatcherServlet'
+2022-04-25 19:39:58.627  INFO 384 --- [main] lavalink.server.Launcher                 : Starting Launcher on DESKTOP-BUO1M60 with PID 384 (/mnt/c/Users/Rahul/Desktop/discord bt/Lavalink.jar started by rahul in /mnt/c/Users/Rahul/Desktop/discord bt)
+2022-04-25 19:39:58.627  INFO 384 --- [main] lavalink.server.Launcher                 : No active profile set, falling back to default profiles: default
+2022-04-25 19:39:58.679  WARN 384 --- [background-preinit] o.s.h.c.j.Jackson2ObjectMapperBuilder    : For Jackson Kotlin classes support please add "com.fasterxml.jackson.module:jackson-module-kotlin" to the classpath
+2022-04-25 19:39:59.333  WARN 384 --- [main] io.undertow.websockets.jsr               : UT026010: Buffer pool was not set on WebSocketDeploymentInfo, the default pool will be used
+2022-04-25 19:39:59.352  INFO 384 --- [main] io.undertow.servlet                      : Initializing Spring embedded WebApplicationContext
+2022-04-25 19:39:59.352  INFO 384 --- [main] o.s.web.context.ContextLoader            : Root WebApplicationContext: initialization completed in 696 ms
+2022-04-25 19:39:59.577  WARN 384 --- [main] l.server.config.SentryConfiguration      : Turning off sentry
+2022-04-25 19:39:59.755  INFO 384 --- [main] c.s.d.l.tools.GarbageCollectionMonitor   : GC monitoring enabled, reporting results every 2 minutes.
+2022-04-25 19:39:59.869  INFO 384 --- [main] lavalink.server.config.KoeConfiguration  : OS: Linux, Arch: amd64
+2022-04-25 19:39:59.869  INFO 384 --- [main] lavalink.server.config.KoeConfiguration  : Enabling JDA-NAS
+2022-04-25 19:39:59.872  INFO 384 --- [main] c.s.l.c.natives.NativeLibraryLoader      : Native library udpqueue: loading with filter null
+2022-04-25 19:39:59.879  INFO 384 --- [main] c.s.l.c.natives.NativeLibraryLoader      : Native library udpqueue: successfully loaded.
+2022-04-25 19:40:00.014  INFO 384 --- [main] o.s.s.concurrent.ThreadPoolTaskExecutor  : Initializing ExecutorService 'applicationTaskExecutor'
+2022-04-25 19:40:00.197  INFO 384 --- [main] org.xnio                                 : XNIO version 3.3.8.Final
+2022-04-25 19:40:00.203  INFO 384 --- [main] org.xnio.nio                             : XNIO NIO Implementation Version 3.3.8.Final
+2022-04-25 19:40:00.243  INFO 384 --- [main] o.s.b.w.e.u.UndertowServletWebServer     : Undertow started on port(s) 2333 (http) with context path ''
+2022-04-25 19:40:00.246  INFO 384 --- [main] lavalink.server.Launcher                 : Started Launcher in 2.063 seconds (JVM running for 2.386)
+2022-04-25 19:40:00.246  INFO 384 --- [main] lavalink.server.Launcher                 : You can safely ignore the big red warning about illegal reflection. See https://github.com/freyacodes/Lavalink/issues/295
+2022-04-25 19:40:04.152  INFO 384 --- [XNIO-1 task-1] io.undertow.servlet                      : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2022-04-25 19:40:04.152  INFO 384 --- [XNIO-1 task-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2022-04-25 19:40:04.156  INFO 384 --- [XNIO-1 task-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms
+2022-04-25 19:40:04.170  INFO 384 --- [XNIO-1 task-1] l.server.io.HandshakeInterceptorImpl     : Incoming connection from /127.0.0.1:64402
+2022-04-25 19:40:04.209  INFO 384 --- [XNIO-1 task-1] lavalink.server.io.SocketServer          : Connection successfully established from Lavalink.py
+2022-04-25 19:40:04.219  INFO 384 --- [XNIO-1 I/O-10] lavalink.server.io.SocketServer          : {"op": "configureResuming", "key": "music-node", "timeout": 60}
+2022-04-25 19:40:17.407  INFO 384 --- [XNIO-1 I/O-10] lavalink.server.io.SocketServer          : Connection closed from /127.0.0.1:64402 with status CloseStatus[code=1006, reason=] -- Session can be resumed within the next 60 seconds with key music-node
