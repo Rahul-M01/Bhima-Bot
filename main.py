@@ -34,6 +34,14 @@ async def on_guild_join(guild):
         """, color=0xd89522)
         await general.send(embed=embed)
 
+@bot.event
+async def on_member_join(member):
+    CHANNEL_ID = config('CHANNEL_ID')
+    channel = bot.get_channel(CHANNEL_ID)
+    embed=discord.Embed(title="*Welcome!*", description=f"""
+    Welcome {member.mention} to {member.guild.name}!
+    """, color=0xd89522)
+    await channel.send(embed=embed)
 
 
 # @client.event

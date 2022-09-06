@@ -6,6 +6,11 @@ from discord import utils
 import os
 import requests
 import json
+import requests
+from decouple import config
+
+WEATHER_API_KEY = config('WEATHER_API_KEY')
+
 
 class Members(commands.Cog):
 
@@ -37,7 +42,7 @@ class Members(commands.Cog):
     async def help(self, ctx):
         embed=discord.Embed(title="*Server Commands*", description=f"""
         **Music Commands**
-        
+
         - **!play [song name]**: Plays a song from youtube.
         - **!pause**: Pauses the current song.
         - **!resume**: Resumes the current song.
@@ -56,7 +61,8 @@ class Members(commands.Cog):
         - **!help** - Shows this message!
         - **!messages <member>** - Shows the number of messages a member has sent!
         - **!all-messages** - Shows the number of messages every member has sent!
-
+        - **!weather <city>** - Shows the weather in a city!
+        
         **Admin Commands**
 
         - **!kick <member>** - Kicks a member!
@@ -68,7 +74,33 @@ class Members(commands.Cog):
         """, color=0x00ff00)
         await ctx.send(embed=embed)
 
-    
+    @commands.command(name='weather')
+    async def weather(self, ctx, *, city: str):
+
+        base_url = "http://api.openweathermap.org/data/2.5/weather?"
+        city_name = city
+        print(base_url)
+        print(city_name)
+        complete_url = base_url + "appid=" + WEATHER_API_KEY + "&q=" + city_name
+        response = requests.get(complete_url)
+        x = response.json()
+        embed = discord.Embed()
+        embed.set_thumbnail(url="http://openweathermap.org/img/w/" + x["weather"][0]["icon"] + ".png")
+        if x["cod"] != "404":
+            y = x["main"]
+            current_temperature = y["temp"]
+            current_pressure = y["pressure"]
+            current_humidiy = y["humidity"]
+            z = x["weather"]
+            weather_description = z[0]["description"]
+            embed.add_field(name="Temperature", value=str(int(current_temperature - 273.15)) + "°C", inline=False)
+            embed.add_field(name="Weather type", value=str(weather_description), inline=False)
+            embed.add_field(name="Cloud coverage", value=str(current_humidiy) + "%", inline=False)
+            embed.set_footer(text="Powered by OpenWeatherMap")
+            await ctx.send(embed=embed)
+        else:
+            await ctx.send(" City Not Found ")
+
 
 def setup(bot):
     bot.add_cog(Members(bot))
