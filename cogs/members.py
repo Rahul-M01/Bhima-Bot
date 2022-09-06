@@ -33,5 +33,36 @@ class Members(commands.Cog):
         await asyncio.sleep(int(time))
         await ctx.author.send(reminder)
         
+    @commands.command(name='help')
+    async def help(self, ctx):
+        embed=discord.Embed(title="*Server Commands*", description=f"""
+        **Music Commands**
+        ```!play [song name]```Commands:
+        
+        
+        **Member Commands**
+        
+        - **!hello** - Says hello!
+        - **!quote** - Gives a random quote!
+        - **!reminder** - Sets a reminder!
+        - **!help** - Shows this message!
+
+        **Admin Commands**
+
+        - **!kick <member>** - Kicks a member!
+        - **!ban <member>** - Bans a member!
+        - **!unban <member>** - Unbans a member!
+        - **!mute <member>** - Mutes a member!
+        - **!clear <x>** - Clears x number of messages!
+
+        **Admin Commands**
+        - **!messages <member>** - Shows the number of messages a member has sent!
+        - **!all-messages** - Shows the number of messages every member has sent!
+
+        """, color=0x00ff00)
+        await ctx.send(embed=embed)
+
+    
+
 def setup(bot):
     bot.add_cog(Members(bot))
