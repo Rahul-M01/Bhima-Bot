@@ -37,8 +37,16 @@ class Members(commands.Cog):
     async def help(self, ctx):
         embed=discord.Embed(title="*Server Commands*", description=f"""
         **Music Commands**
-        ```!play [song name]```Commands:
         
+        - **!play [song name]**: Plays a song from youtube.
+        - **!pause**: Pauses the current song.
+        - **!resume**: Resumes the current song.
+        - **!stop**: Stops the current song.
+        - **!skip**: Skips the current song.
+        - **!queue**: Shows the current queue.
+        - **!clear**: Clears the current queue.
+        - **!lower**: Lowers the volume.
+        - **!higher**: Raises the volume.
         
         **Member Commands**
         
@@ -46,6 +54,8 @@ class Members(commands.Cog):
         - **!quote** - Gives a random quote!
         - **!reminder** - Sets a reminder!
         - **!help** - Shows this message!
+        - **!messages <member>** - Shows the number of messages a member has sent!
+        - **!all-messages** - Shows the number of messages every member has sent!
 
         **Admin Commands**
 
@@ -54,10 +64,6 @@ class Members(commands.Cog):
         - **!unban <member>** - Unbans a member!
         - **!mute <member>** - Mutes a member!
         - **!clear <x>** - Clears x number of messages!
-
-        **Admin Commands**
-        - **!messages <member>** - Shows the number of messages a member has sent!
-        - **!all-messages** - Shows the number of messages every member has sent!
 
         """, color=0x00ff00)
         await ctx.send(embed=embed)

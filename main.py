@@ -18,6 +18,7 @@ owner_id = config('OWNER_ID')
 
 @bot.event
 async def on_ready():
+    bot.remove_command('help')
     for file in os.listdir("./cogs"):
         if file.endswith(".py"):
             bot.load_extension(f"cogs.{file[:-3]}")
