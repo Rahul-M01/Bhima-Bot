@@ -38,6 +38,15 @@ async def on_guild_join(guild):
 async def on_member_join(member):
     CHANNEL_ID = config('CHANNEL_ID')
     channel = bot.get_channel(CHANNEL_ID)
+    with open('leveling.json', 'r') as f:
+        users = json.load(f)
+    if(member.id not in users):
+        users[member.id] = {}
+        users[member.id]['experience'] = 0
+        users[member.id]['level'] = 1
+        with open('leveling.json', 'w') as f:            
+            json.dump(users, f)
+
     embed=discord.Embed(title="*Welcome!*", description=f"""
     Welcome {member.mention} to {member.guild.name}!
     """, color=0xd89522)
