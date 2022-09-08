@@ -47,11 +47,11 @@ Bhima is a discord bot, developed using Python. It has a variety of features, ra
  
    
 ## Work in Progress
-- [ ] Welcoming new users to the server
+- [x] Welcoming new users to the server
 - [ ] Get reminder over longer periods of time
-- [ ] Leveling system
+- [x] Leveling system
 - [ ] Minigame
 - [ ] Polls
-- [ ] Weather statistics using Weather API
+- [x] Weather statistics using Weather API
 
     
