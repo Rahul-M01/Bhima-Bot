@@ -18,9 +18,9 @@ class Leveling(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @bot.event
-    async def on_message(message):
-        if message.author == bot.user:
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.author.id == 961966319752851497:
             return
 
         if message.content.startswith('!'):
@@ -29,44 +29,57 @@ class Leveling(commands.Cog):
         with open('leveling.json', 'r') as f:
             users = json.load(f)
 
-        await update_data(users, message.author)
-        await add_experience(users, message.author, 5)
-        await level_up(users, message.author, message)
-
+        await self.update_data(users, message.author)
+        await self.add_experience(users, message.author, 5)
+        if(await self.level_up(users, message.author) == 1):
+            await message.channel.send(f"{message.author.mention} has leveled up to level {users[str(message.author.id)]['level']}")
         with open('leveling.json', 'w') as f:
             json.dump(users, f)
     
-    async def update_data(users, user):
-        if not user.id in users:
-            users[user.id] = {}
-            users[user.id]['experience'] = 0
-            users[user.id]['level'] = 1
+    async def level_up(self, users, message):
     
-    async def add_experience(users, user, exp):
-        users[user.id]['experience'] += exp
-    
-    async def level_up(users, user, message):
-        experience = users[user.id]['experience']
-        lvl_start = users[user.id]['level']
-        lvl_end = int(experience ** (1/4))
+        experience = users[str(message.id)]['experience']
+        lvl_end = int(experience % 1000)
 
-        if lvl_start < lvl_end:
-            await message.channel.send(f'{user.mention} has leveled up to level {lvl_end}')
-            users[user.id]['level'] = lvl_end
-    
+        if lvl_end == 0:
+            users[str(message.id)]['level'] += 1
+            self.add_experience(users, message.id, 5)
+            return 1
+
+    async def add_experience(self, users, message, exp):
+        users[str(message.id)]['experience'] += exp
+
+    async def update_data(self, users, message):
+        if not str(message.id) in users:
+            users[str(message.id)] = {}
+            users[str(message.id)]['experience'] = 0
+            users[str(message.id)]['level'] = 1
+
     @commands.command(name='level')
     async def level(self, ctx, member: discord.Member = None):
         if member is None:
             member = ctx.author
         with open('leveling.json', 'r') as f:
             users = json.load(f)
-            if(str(member.id) in users):
-                embed=discord.Embed(title="*Level*", description=f"""
-                {member.mention} is level {users[str(member.id)]['level']}
-                """, color=0xd89522)
-                await ctx.send(embed=embed)
+        level = users[str(member.id)]['level']
+        experience = users[str(member.id)]['experience']
+        progress = int((experience / 100) % 10)
+        bar = await self.progress_bar(progress)
+        embed = discord.Embed(title=f"{member.name}'s level", description=f"{bar} {progress}/10", color=0xd89522)
+        embed.add_field(name="Level", value=level)
+        embed.add_field(name="Experience", value=experience)
+        await ctx.send(embed=embed)
 
-    
+
+    async def progress_bar(self, progress):
+        bar = ""
+        for i in range(0, progress):
+            bar += "▓"
+        for i in range(progress, 10):
+            bar += "░"
+        return bar
+
+
     @commands.command(name='leaderboard')
     async def leaderboard(self, ctx):
         with open('leveling.json', 'r') as f:
@@ -75,7 +88,8 @@ class Leveling(commands.Cog):
         for user in users:
             name = int(user)
             level = users[user]['level']
-            leader_board[name] = level
+            experience = users[user]['experience']
+            leader_board[name] = [level, experience]
         leader_board = sorted(leader_board.items(), key=lambda x: x[1], reverse=True)
         embed = discord.Embed(title="Leaderboard", description="The top 10 levels in the server", color=0x00ff00)
         index = 1
@@ -83,8 +97,8 @@ class Leveling(commands.Cog):
             if index > 10:
                 break
             else:
-                user_id = f"<@{int(x[0])}>"
-                embed.add_field(name=f"{index}. {user_id}", value=f"Level: {x[1]}", inline=False)
+                username = ctx.guild.get_member(int(x[0]))
+                embed.add_field(name=f"{index}. {username}", value=f"Level: {x[1][0]}\nExperience: {x[1][1]}", inline=False)
                 index += 1
         await ctx.send(embed=embed)
 
