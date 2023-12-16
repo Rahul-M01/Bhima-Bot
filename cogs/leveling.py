@@ -35,7 +35,7 @@ class Leveling(commands.Cog):
     #==================================
     #          Shows Level
     #==================================
-    @commands.command()
+    @commands.command(name='level', help='Shows your current level')
     async def level(self, ctx, user: discord.Member = None):
         user = user or ctx.author
         level = self.user_levels.get(user.id, 0)

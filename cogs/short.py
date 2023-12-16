@@ -2,12 +2,12 @@ import discord
 from discord.ext import commands
 import pyshorteners  # Install using pip install pyshorteners
 
-class URLShortenerCog(commands.Cog):
+class URLShortener(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.shortener = pyshorteners.Shortener()
 
-    @commands.command(name='short')
+    @commands.command(name='short', help='Shortens a given URL. Usage: !short [url]')
     async def shorten_url(self, ctx, url):
         try:
             # Shorten the URL
@@ -31,4 +31,4 @@ class URLShortenerCog(commands.Cog):
 
 
 async def setup(bot):
-    await bot.add_cog(URLShortenerCog(bot))
+    await bot.add_cog(URLShortener(bot))

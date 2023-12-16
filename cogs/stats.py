@@ -22,7 +22,7 @@ class MessageStats(commands.Cog):
     #==============================================================
     #          Shows Total Messages, along with Top 5 Words
     #==============================================================
-    @commands.command()
+    @commands.command(name='messages', help='Shows Total Messages, along with Top 5 Words')
     async def messages(self, ctx):
         user_id = ctx.author.id
         message_count = self.user_message_count[user_id]
@@ -38,7 +38,7 @@ class MessageStats(commands.Cog):
     #====================================================
     #       Shows top 5 most messaging users
     #====================================================
-    @commands.command()
+    @commands.command(name='messagestats', help='Shows top 5 most messaging users')
     async def message_stats(self, ctx):
         top_users = sorted(self.user_message_count.items(), key=lambda x: x[1], reverse=True)[:5]
         embed = discord.Embed(title="Top Messaging Users", color=0x3498db)

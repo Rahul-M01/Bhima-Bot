@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from collections import deque
 
-class DeletedMessagesCog(commands.Cog):
+class DeletedMessages(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.deleted_messages = deque(maxlen=100)  # Adjust maxlen as needed
@@ -18,7 +18,7 @@ class DeletedMessagesCog(commands.Cog):
         if not before.author.bot:
             self.edited_messages.append(f"{before.author.name} (Original): {before.content}")
 
-    @commands.command(name='deleted')
+    @commands.command(name='deleted', help='Shows recently deleted messages')
     @commands.has_permissions(manage_messages=True)
     async def show_deleted(self, ctx):
         if not self.deleted_messages:
@@ -28,7 +28,7 @@ class DeletedMessagesCog(commands.Cog):
         embed = discord.Embed(title="Recently Deleted Messages", description="\n".join(self.deleted_messages), color=discord.Color.red())
         await ctx.send(embed=embed)
 
-    @commands.command(name='edited')
+    @commands.command(name='edited', help='Shows recently edited messages')
     @commands.has_permissions(manage_messages=True)
     async def show_edited(self, ctx):
         if not self.edited_messages:
@@ -39,4 +39,4 @@ class DeletedMessagesCog(commands.Cog):
         await ctx.send(embed=embed)
 
 async def setup(bot):
-    await bot.add_cog(DeletedMessagesCog(bot))
+    await bot.add_cog(DeletedMessages(bot))

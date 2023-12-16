@@ -6,7 +6,9 @@ class Poll(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="poll")
+    @commands.command(name="poll", help="Creates a poll with the specified question and options,\
+                    example: !poll \"What is your favorite color?\" \"Red\" \"Blue\" \"Yellow\",\
+                    the poll lasts for 60 seconds")
     async def create_poll(self, ctx, question, *options: str):
         if len(options) > 10:
             await ctx.send("You can provide a maximum of 10 options.")
