@@ -1,19 +1,42 @@
 import discord
 from discord.ext import commands
-import youtube_dl
+from discord import FFmpegPCMAudio
+import yt_dlp
 
-class Music(commands.Cog):
+class MusicCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command()
     async def join(self, ctx):
-        """Joins the voice channel of the command issuer."""
-        if ctx.author.voice:
-            channel = ctx.author.voice.channel
-            await channel.connect()
-        else:
-            await ctx.send("You are not in a voice channel.")
+        """Joins the author's voice channel."""
+        if ctx.author.voice is None:
+            return await ctx.send("You are not connected to a voice channel.")
+        channel = ctx.author.voice.channel
+        await channel.connect()
+
+    @commands.command()
+    async def play(self, ctx, *, url: str):
+        """Plays a song from a given YouTube URL."""
+        if not ctx.voice_client:
+            await ctx.invoke(self.join)
+
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'quiet': True
+        }
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+            URL = info['url']
+            source = FFmpegPCMAudio(URL, **{'options': '-vn'})
+            ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
+
+    @commands.command()
+    async def stop(self, ctx):
+        """Stops playing the song."""
+        if ctx.voice_client and ctx.voice_client.is_playing():
+            ctx.voice_client.stop()
 
     @commands.command()
     async def leave(self, ctx):
@@ -21,24 +44,5 @@ class Music(commands.Cog):
         if ctx.voice_client:
             await ctx.voice_client.disconnect()
 
-    @commands.command()
-    async def play(self, ctx, url):
-        """Plays a song from a YouTube URL."""
-        if not ctx.voice_client:
-            return await ctx.send("I am not in a voice channel.")
-
-        ydl_opts = {
-            'format': 'bestaudio/best',
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'mp3',
-                'preferredquality': '192',
-            }],
-        }
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=False)
-            URL = info['formats'][0]['url']
-            ctx.voice_client.play(discord.FFmpegPCMAudio(URL))
-
 async def setup(bot):
-    await bot.add_cog(Music(bot))
+    await bot.add_cog(MusicCog(bot))
