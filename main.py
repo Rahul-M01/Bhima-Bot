@@ -1,69 +1,30 @@
-import os
 import discord
 from discord.ext import commands
-import json
-# from perspective import PerspectiveAPI
-from googleapiclient import discovery
-from discord.ext.commands import has_permissions, MissingPermissions
-from decouple import config
-from discord.utils import find
+import config
+import os
 
+import tracemalloc
+tracemalloc.start()
 
-API_key = API_USERNAME = config('API_key')
 intents = discord.Intents.default()
+intents.messages = True  # Enable the message content intent
+intents.guilds = True
 intents.members = True
-bot = commands.Bot(command_prefix="!", intents=intents)
-owner_id = config('OWNER_ID')
+intents.message_content = True  # Add this line
 
+bot = commands.Bot(command_prefix='!', intents=intents)
 
 @bot.event
 async def on_ready():
-    bot.remove_command('help')
-    for file in os.listdir("./cogs"):
-        if file.endswith(".py"):
-            bot.load_extension(f"cogs.{file[:-3]}")
-    print('Logged in succesfully.')
+    print(f'Logged in as {bot.user}')
+    for filename in os.listdir('./cogs'):
+        if filename.endswith('.py'):
+            cog_name = filename[:-3]
+            try:
+                await bot.load_extension(f'cogs.{cog_name}')  # Use await here
+                print(f'Loaded cog: {cog_name}')
+            except Exception as e:
+                print(f'Failed to load cog {cog_name}: {e}')
+    print(f'Logged in as {bot.user}')
 
-@bot.event
-async def on_guild_join(guild):
-    general = find(lambda x: x.name == 'general',  guild.text_channels)
-    if general and general.permissions_for(guild.me).send_messages:
-        embed=discord.Embed(title="*Thanks For Adding Me!*", description=f"""
-        Thanks for adding me to {guild.name}!
-        You can use the `!help` command to get started!
-        """, color=0xd89522)
-        await general.send(embed=embed)
-
-@bot.event
-async def on_member_join(member):
-    CHANNEL_ID = config('CHANNEL_ID')
-    channel = bot.get_channel(CHANNEL_ID)
-    with open('leveling.json', 'r') as f:
-        users = json.load(f)
-    if(member.id not in users):
-        users[member.id] = {}
-        users[member.id]['experience'] = 0
-        users[member.id]['level'] = 1
-        with open('leveling.json', 'w') as f:            
-            json.dump(users, f)
-
-    embed=discord.Embed(title="*Welcome!*", description=f"""
-    Welcome {member.mention} to {member.guild.name}!
-    """, color=0xd89522)
-    await channel.send(embed=embed)
-
-
-# @client.event
-# async def on_message(message):
-#     await client.process_commands(message)
-#     p = PerspectiveAPI(API_key)
-#     result = p.score(message.content)
-#     if isclose(result["TOXICITY"], 0.93, abs_tol=10**-1) or isclose(
-#             result["TOXICITY"], 0.99, abs_tol=10**-1) or isclose(
-#                 result["TOXICITY"], 0.75, abs_tol=10**-1) or isclose(
-#                     result["TOXICITY"], 1.0, abs_tol=10**-1):
-#         await message.channel.send("Seek help. Find god.")
-
-
-key = config('TOKEN')
-bot.run(key)
+bot.run(config.TOKEN)

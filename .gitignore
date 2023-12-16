@@ -1,8 +1,8 @@
 __pycache__/
 
 node_modules
-Lavalink.jar
 application.yml
 package-lock.json
 .env
 logs
+config.py
