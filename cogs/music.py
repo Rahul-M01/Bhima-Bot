@@ -2,6 +2,45 @@ import discord
 from discord.ext import commands
 from discord import FFmpegPCMAudio
 import yt_dlp
+from discord.ui import Button, View
+
+class PauseButton(Button):
+    def __init__(self, cog):
+        super().__init__(label="▐▐", style=discord.ButtonStyle.grey)
+        self.cog = cog
+        self.paused = False  # Indicates the current state
+
+    async def callback(self, interaction: discord.Interaction):
+        # Toggle the state
+        self.paused = not self.paused
+
+        # Update the button label based on the state
+        if self.paused:
+            self.label = "▶"
+            await self.cog.pause(interaction)
+        else:
+            self.label = "▐▐"
+            await self.cog.resume(interaction)
+
+        # Update the message with the new button label
+        await interaction.message.edit(view=self.view)
+
+
+class SkipButton(Button):
+    def __init__(self, cog, label="▶▶▶"):
+        super().__init__(label=label, style=discord.ButtonStyle.blurple)
+        self.cog = cog
+
+    async def callback(self, interaction: discord.Interaction):
+        await self.cog.skip(interaction)
+
+class StopButton(Button):
+    def __init__(self, cog, label="◼"):
+        super().__init__(label=label, style=discord.ButtonStyle.red)
+        self.cog = cog
+
+    async def callback(self, interaction: discord.Interaction):
+        await self.cog.stop(interaction)
 
 class MusicCog(commands.Cog):
     def __init__(self, bot):
@@ -45,22 +84,6 @@ class MusicCog(commands.Cog):
         await self.play_song(ctx, song)
 
     #=======================================
-    #                Pauses               #
-    #=======================================
-    @commands.command()
-    async def pause(self, ctx):
-        if ctx.voice_client and ctx.voice_client.is_playing():
-            ctx.voice_client.pause()
-
-    #=======================================
-    #                Resumes               #
-    #=======================================
-    @commands.command()
-    async def resume(self, ctx):
-        if ctx.voice_client and ctx.voice_client.is_paused():
-            ctx.voice_client.resume()
-
-    #=======================================
     #              Adjusts Volume          #
     #=======================================
     @commands.command()
@@ -74,20 +97,45 @@ class MusicCog(commands.Cog):
             await ctx.send("Not connected to a voice channel.")
     
     @commands.command()
-    async def skip(self, ctx):
-        """Skips the current song and plays the next one in the queue."""
-        if ctx.voice_client and ctx.voice_client.is_playing():
-            ctx.voice_client.stop()
-            await self.play_next(ctx)
+    async def pause(self, interaction):
+        voice_client = interaction.guild.voice_client
+        if voice_client and voice_client.is_playing():
+            voice_client.pause()
+            await interaction.response.send_message("Paused the music.", ephemeral=True)
         else:
-            await ctx.send("No song is currently playing.")
+            await interaction.response.send_message("No music is currently playing.")
 
     @commands.command()
-    async def stop(self, ctx):
-        if ctx.voice_client and ctx.voice_client.is_playing():
-            ctx.voice_client.stop()
+    async def resume(self, interaction):
+        voice_client = interaction.guild.voice_client
+        if voice_client and voice_client.is_paused():
+            voice_client.resume()
+            await interaction.response.send_message("Resumed the music.", ephemeral=True)
+        else:
+            await interaction.response.send_message("Music is not paused.")
+
+
+    @commands.command()
+    async def skip(self, interaction):
+        voice_client = interaction.guild.voice_client
+        if voice_client and (voice_client.is_playing() or voice_client.is_paused()):
+            voice_client.stop()  # This should stop the current song
+            # play_next will be called automatically after the song stops
+            await interaction.response.send_message("Skipping to the next song.")
+        else:
+            await interaction.response.send_message("No music is playing to skip.")
+
+    @commands.command()
+    async def stop(self, interaction):
+        voice_client = interaction.guild.voice_client
+        if voice_client and voice_client.is_playing():
+            voice_client.stop()
             self.current_song = None
             self.song_queue.clear()
+            await interaction.response.send_message("Stopped the music and cleared the queue.", ephemeral=True)
+
+
+
 
     @commands.command()
     async def leave(self, ctx):
@@ -98,8 +146,13 @@ class MusicCog(commands.Cog):
     async def queue(self, ctx):
         if len(self.song_queue) == 0:
             return await ctx.send("The queue is empty.")
+
         queue_info = "\n".join([f"{idx + 1}: {song['title']}" for idx, song in enumerate(self.song_queue)])
-        await ctx.send(f"Current Queue:\n{queue_info}")
+        view = View()
+        view.add_item(PauseButton(self))
+        view.add_item(SkipButton(self))
+        view.add_item(StopButton(self))
+        await ctx.send(f"Current Queue:\n{queue_info}", view=view)
 
 async def setup(bot):
     await bot.add_cog(MusicCog(bot))
