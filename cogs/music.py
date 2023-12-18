@@ -17,7 +17,7 @@ class MusicCog(commands.Cog):
             self.current_song = None
 
     async def play_song(self, ctx, song):
-        source = FFmpegPCMAudio(song, **{'options': '-vn'})
+        source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(song['url']))
         ctx.voice_client.play(source, after=lambda e: self.bot.loop.create_task(self.play_next(ctx)))
 
     @commands.command()
@@ -35,14 +35,14 @@ class MusicCog(commands.Cog):
         ydl_opts = {'format': 'bestaudio/best', 'quiet': True}
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
-            song = info['url']
+            song = {'url': info['url'], 'title': info['title']}
 
         if ctx.voice_client.is_playing() or self.current_song is not None:
             self.song_queue.append(song)
-            return await ctx.send("Song added to the queue.")
+            return await ctx.send(f"Added to queue: {song['title']}")
 
         self.current_song = song
-        await self.play_song(ctx, song)
+        await self.play_song(ctx, song['url'])
 
     #=======================================
     #                Pauses               #
@@ -94,10 +94,8 @@ class MusicCog(commands.Cog):
     async def queue(self, ctx):
         if len(self.song_queue) == 0:
             return await ctx.send("The queue is empty.")
-        queue_info = "\n".join([f"{idx + 1}: {song}" for idx, song in enumerate(self.song_queue)])
+        queue_info = "\n".join([f"{idx + 1}: {song['title']}" for idx, song in enumerate(self.song_queue)])
         await ctx.send(f"Current Queue:\n{queue_info}")
-
-    # Implement importing from YouTube Music or Spotify as needed
 
 async def setup(bot):
     await bot.add_cog(MusicCog(bot))
