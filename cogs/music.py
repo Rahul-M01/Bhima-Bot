@@ -42,7 +42,7 @@ class MusicCog(commands.Cog):
             return await ctx.send(f"Added to queue: {song['title']}")
 
         self.current_song = song
-        await self.play_song(ctx, song['url'])
+        await self.play_song(ctx, song)
 
     #=======================================
     #                Pauses               #
@@ -66,8 +66,12 @@ class MusicCog(commands.Cog):
     @commands.command()
     async def volume(self, ctx, *, volume: int):
         if ctx.voice_client and ctx.voice_client.source:
+            # Ensure volume is between 1 and 100
+            volume = max(0, min(volume, 100))
             ctx.voice_client.source.volume = volume / 100
             await ctx.send(f"Volume set to {volume}%")
+        else:
+            await ctx.send("Not connected to a voice channel.")
     
     @commands.command()
     async def skip(self, ctx):
