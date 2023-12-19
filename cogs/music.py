@@ -59,6 +59,7 @@ class MusicCog(commands.Cog):
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(song['url']))
         ctx.voice_client.play(source, after=lambda e: self.bot.loop.create_task(self.play_next(ctx)))
 
+    
     @commands.command()
     async def join(self, ctx):
         if ctx.author.voice is None:
@@ -66,6 +67,9 @@ class MusicCog(commands.Cog):
         channel = ctx.author.voice.channel
         await channel.connect()
 
+    #=======================================
+    #              Plays Music             #
+    #=======================================
     @commands.command()
     async def play(self, ctx, *, url: str):
         if not ctx.voice_client:
@@ -96,6 +100,9 @@ class MusicCog(commands.Cog):
         else:
             await ctx.send("Not connected to a voice channel.")
     
+    #=======================================
+    #              Pauses Music            #
+    #=======================================
     @commands.command()
     async def pause(self, interaction):
         voice_client = interaction.guild.voice_client
@@ -105,6 +112,9 @@ class MusicCog(commands.Cog):
         else:
             await interaction.response.send_message("No music is currently playing.")
 
+    #=======================================
+    #              Resumes Music           #
+    #=======================================
     @commands.command()
     async def resume(self, interaction):
         voice_client = interaction.guild.voice_client
@@ -115,6 +125,9 @@ class MusicCog(commands.Cog):
             await interaction.response.send_message("Music is not paused.")
 
 
+    #=======================================
+    #              Skips Song              #
+    #=======================================
     @commands.command()
     async def skip(self, interaction):
         voice_client = interaction.guild.voice_client
@@ -125,6 +138,9 @@ class MusicCog(commands.Cog):
         else:
             await interaction.response.send_message("No music is playing to skip.")
 
+    #=======================================
+    #              Stops Music             #
+    #=======================================
     @commands.command()
     async def stop(self, interaction):
         voice_client = interaction.guild.voice_client
@@ -134,9 +150,9 @@ class MusicCog(commands.Cog):
             self.song_queue.clear()
             await interaction.response.send_message("Stopped the music and cleared the queue.", ephemeral=True)
 
-
-
-
+    #=======================================
+    #              Leaves Voice            #
+    #=======================================
     @commands.command()
     async def leave(self, ctx):
         if ctx.voice_client:
@@ -145,14 +161,17 @@ class MusicCog(commands.Cog):
     @commands.command()
     async def queue(self, ctx):
         if len(self.song_queue) == 0:
-            return await ctx.send("The queue is empty.")
+            return await ctx.send(embed=discord.Embed(description="The queue is empty.", color=discord.Color.blue()))
 
-        queue_info = "\n".join([f"{idx + 1}: {song['title']}" for idx, song in enumerate(self.song_queue)])
+        embed = discord.Embed(title="Music Queue", description="", color=discord.Color.blue())
+        for idx, song in enumerate(self.song_queue):
+            embed.add_field(name=f"{idx + 1}. {song['title']}", value="\u200b", inline=False)
+
         view = View()
         view.add_item(PauseButton(self))
         view.add_item(SkipButton(self))
         view.add_item(StopButton(self))
-        await ctx.send(f"Current Queue:\n{queue_info}", view=view)
+        await ctx.send(embed=embed, view=view)
 
 async def setup(bot):
     await bot.add_cog(MusicCog(bot))
