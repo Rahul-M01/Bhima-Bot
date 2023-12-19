@@ -3,6 +3,7 @@ from discord.ext import commands
 from discord import FFmpegPCMAudio
 import yt_dlp
 from discord.ui import Button, View
+import asyncio
 
 class PauseButton(Button):
     def __init__(self, cog):
@@ -59,6 +60,9 @@ class MusicCog(commands.Cog):
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(song['url']))
         ctx.voice_client.play(source, after=lambda e: self.bot.loop.create_task(self.play_next(ctx)))
 
+        embed = discord.Embed(title="🎶 Now playing:", description=song['title'], color=discord.Color.green())
+        await ctx.send(embed=embed)
+
     
     @commands.command()
     async def join(self, ctx):
@@ -70,22 +74,72 @@ class MusicCog(commands.Cog):
     #=======================================
     #              Plays Music             #
     #=======================================
+    # Helper function to handle search and selection
+    async def search_and_select(self, ctx, query):
+        ydl_opts = {
+            'format': 'bestaudio/best',
+            'quiet': True,
+            'default_search': 'ytsearch5'  # Search for top 5 results
+        }
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(query, download=False)
+            results = info['entries']
+
+        if not results:
+            await ctx.send("No results found.")
+            return None
+
+        embed = discord.Embed(title="Search Results", description="", color=discord.Color.blue())
+        for i, track in enumerate(results, start=1):
+            embed.add_field(name=f"{i}. {track['title']}", value=track['webpage_url'], inline=False)
+        
+        message = await ctx.send(embed=embed)
+
+        # Check for user response
+        def check(m):
+            return m.author == ctx.author and m.channel == ctx.channel and m.content.isdigit()
+
+        try:
+            response = await self.bot.wait_for('message', check=check, timeout=30.0)  # 30 seconds timeout
+            content = int(response.content)
+            if 1 <= content <= len(results):
+                return results[content - 1]
+            else:
+                await ctx.send("Invalid choice.")
+                return None
+        except asyncio.TimeoutError:
+            await message.delete()
+            await ctx.send("Response timed out. Please try again.")
+            return None
+
+    # Play command adjusted for URL or query
     @commands.command()
-    async def play(self, ctx, *, url: str):
+    async def play(self, ctx, *, input: str):
+        # Join the voice channel if not already connected
         if not ctx.voice_client:
             await ctx.invoke(self.join)
 
-        ydl_opts = {'format': 'bestaudio/best', 'quiet': True}
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=False)
-            song = {'url': info['url'], 'title': info['title']}
+        # Check if input is a direct link or a query
+        song = None
+        if input.startswith(("http://", "https://")):
+            ydl_opts = {'format': 'bestaudio/best', 'quiet': True}
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(input, download=False)
+                song = {'url': info['url'], 'title': info['title']}
+        else:
+            song = await self.search_and_select(ctx, input)
+            if not song:
+                return  # Exit if no song was selected
 
+        # Now play or add the song to the queue
         if ctx.voice_client.is_playing() or self.current_song is not None:
             self.song_queue.append(song)
-            return await ctx.send(f"Added to queue: {song['title']}")
+            await ctx.send(f"Added to queue: {song['title']}")
+        else:
+            self.current_song = song
+            await self.play_song(ctx, song)
 
-        self.current_song = song
-        await self.play_song(ctx, song)
 
     #=======================================
     #              Adjusts Volume          #
