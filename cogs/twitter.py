@@ -8,17 +8,18 @@ class TweetEmbed(commands.Cog):
 
     @commands.command(name='embed')
     async def embed_tweet(self, ctx, *, message: str):
-        if 'twitter.com' or 'x.com' in message and 'status' in message:
-            url = re.search("(?P<url>https?://[^\s]+)", message).group("url")
-
-            embed = discord.Embed()
-            embed.add_field(name="Tweet Link", value=url, inline=False)
-
-            await ctx.send(embed=embed)
-
-            await ctx.message.delete()
+        # Regular expression to match and replace the Twitter URL
+        if(re.search(r'twitter\.com', message) is None and re.search(r'x\.com', message) is None):
+            await ctx.send("This is not a tweet!")
+            return
         else:
-            await ctx.send("Please provide a valid Twitter link.")
+            if(re.search(r'twitter\.com', message)):
+                modified_message = re.sub(r'twitter\.com', 'vxtwitter.com', message)
+            elif(re.search(r'x\.com', message)):
+                modified_message = re.sub(r'x\.com', 'vxtwitter.com', message)
+            await ctx.message.delete()
+            # Send the modified message
+            await ctx.send(modified_message)
 
-def setup(bot):
-    bot.add_cog(TweetEmbed(bot))
+async def setup(bot):
+    await bot.add_cog(TweetEmbed(bot))
