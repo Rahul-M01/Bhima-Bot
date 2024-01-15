@@ -5,8 +5,8 @@ from collections import deque
 class DeletedMessages(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.deleted_messages = deque(maxlen=100)  # Adjust maxlen as needed
-        self.edited_messages = deque(maxlen=100)   # Adjust maxlen as needed
+        self.deleted_messages = deque(maxlen=10)  # Adjust maxlen as needed
+        self.edited_messages = deque(maxlen=10)   # Adjust maxlen as needed
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):

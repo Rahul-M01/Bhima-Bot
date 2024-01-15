@@ -126,9 +126,11 @@ class MusicCog(commands.Cog):
             ydl_opts = {'format': 'bestaudio/best', 'quiet': True}
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(input, download=False)
-                song = {'url': info['url'], 'title': info['title']}
+                song = {'url': info['url'], 'title': info['title'], 'artist': info.get('uploader', 'Unknown artist')}        
         else:
             song = await self.search_and_select(ctx, input)
+            if song:
+                song = {'url': song['url'], 'title': song['title'], 'artist': song.get('uploader', 'Unknown artist')}
             if not song:
                 return  # Exit if no song was selected
 
@@ -212,6 +214,9 @@ class MusicCog(commands.Cog):
         if ctx.voice_client:
             await ctx.voice_client.disconnect()
 
+    #=======================================
+    #              Shows the Queue         #
+    #=======================================
     @commands.command()
     async def queue(self, ctx):
         if len(self.song_queue) == 0:
@@ -219,7 +224,7 @@ class MusicCog(commands.Cog):
 
         embed = discord.Embed(title="Music Queue", description="", color=discord.Color.blue())
         for idx, song in enumerate(self.song_queue):
-            embed.add_field(name=f"{idx + 1}. {song['title']}", value="\u200b", inline=False)
+            embed.add_field(name=f"{idx + 1}. {song['title']} by {song['artist']}", value="\u200b", inline=False)
 
         view = View()
         view.add_item(PauseButton(self))
