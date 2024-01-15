@@ -2,10 +2,12 @@
 from discord.ext import commands
 import discord
 import asyncio
+import json
 
 class ReloadCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.data_file = '../logs/message_stats.json'  # Path to your JSON file
 
     #==================================
     #          Reloads Cogs
@@ -21,22 +23,41 @@ class ReloadCog(commands.Cog):
     #          Shows Stats
     #==================================
     @commands.command(name='userstats')
-    @commands.is_owner()
+    @commands.has_permissions(administrator=True)
     async def user_stats(self, ctx, member: discord.Member):
-        message_cog = self.bot.get_cog("MessageStats")
-        if not message_cog:
-            await ctx.send("MessageStats cog is not loaded.")
+        # Load data from the file
+        try:
+            with open(self.data_file, 'r') as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            await ctx.send("Data file not found.")
             return
 
-        message_count = message_cog.user_message_count[member.id]
-        most_used_words = message_cog.user_word_frequency[member.id].most_common(5)
+        guild_id = str(ctx.guild.id)
+        user_id = str(member.id)
+
+        # Extract message count and word frequency for the member
+        user_message_count = data.get('user_message_count', {}).get(guild_id, {}).get(user_id, 0)
+        user_word_frequency = data.get('user_word_frequency', {}).get(guild_id, {}).get(user_id, {})
+
+        most_used_words = sorted(user_word_frequency.items(), key=lambda x: x[1], reverse=True)[:5]
         word_stats = '\n'.join([f'{word}: {count}' for word, count in most_used_words])
 
+        # Create and send the embed
         embed = discord.Embed(title=f"Stats for {member.display_name}", color=0x3498db)
-        embed.add_field(name="Message Count", value=message_count, inline=False)
+        embed.add_field(name="Message Count", value=user_message_count, inline=False)
         embed.add_field(name="Most Used Words", value=word_stats or "None", inline=False)
 
         await ctx.send(embed=embed)
+
+    @user_stats.error
+    async def user_stats_error(self, ctx, error):
+        if isinstance(error, commands.MissingPermissions):
+            await ctx.send("You do not have permission to use this command.")
+        else:
+            # Handle other types of errors if necessary
+            pass
+
 
     #==================================
     #          Mutes Members
@@ -66,6 +87,15 @@ class ReloadCog(commands.Cog):
             await ctx.send("I don't have permission to add roles.")
         except discord.HTTPException:
             await ctx.send("Failed to add the mute role.")
+
+    @mute.error
+    async def mute_error(self, ctx, error):
+        if isinstance(error, commands.MissingPermissions):
+            await ctx.send("You do not have permission to use this command.")
+        else:
+            # Handle other types of errors if necessary
+            pass
+
     
     #==================================
     #          Unmutes Members
@@ -90,7 +120,7 @@ class ReloadCog(commands.Cog):
     #          Purges Messages
     #==================================
     @commands.command(name='purge')
-    @commands.is_owner()
+    @commands.has_permissions(manage_roles=True)
     async def purge(self, ctx, amount: int):
         if amount < 1:
             await ctx.send("Please specify a number greater than 0.")
@@ -99,6 +129,13 @@ class ReloadCog(commands.Cog):
         deleted = await ctx.channel.purge(limit=amount)
         await ctx.send(f'Deleted {len(deleted)} message(s)', delete_after=5)
 
+    @purge.error
+    async def purge_error(self, ctx, error):
+        if isinstance(error, commands.MissingPermissions):
+            await ctx.send("You do not have permission to use this command.")
+        else:
+            # Handle other types of errors if necessary
+            pass
 
 
 async def setup(bot):
