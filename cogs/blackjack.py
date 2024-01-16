@@ -2,6 +2,8 @@ import discord
 from discord.ext import commands
 import random
 import asyncio
+from discord.ui import Button, View
+from discord import Embed
 
 class BlackjackGame:
     def __init__(self):
@@ -10,11 +12,12 @@ class BlackjackGame:
         self.in_game = False
         self.standing_players = set()
 
-    def start_game(self, player):
+    async def start_game(self, player):
         if self.in_game:
             return "Game is already in progress."
         self.in_game = True
         self.players = {player: {"hand": self.draw_hand(), "bet": 0}}
+        self.dealer_hand = self.draw_hand()
         hand_message = f"Your starting hand: {self.players[player]['hand']}"
         asyncio.create_task(self.send_hand_dm(player, hand_message))
         return f"Game started. {player.mention}, it's your turn."
@@ -27,12 +30,17 @@ class BlackjackGame:
             print(f"Could not send DM to {player.name}. They might have DMs disabled.")
 
     async def join_game(self, player):
-        if self.in_game and player not in self.players:
-            self.players[player] = {"hand": self.draw_hand(), "bet": 0}
-            hand_message = f"Your hand: {self.players[player]['hand']}"
-            await self.send_hand_dm(player, hand_message)
-            return f"{player.mention} has joined the game."
-        return "Unable to join the game at this time."
+        if not self.in_game:
+            return "No game is currently in progress. Please start a new game first."
+
+        if player in self.players:
+            return f"{player.mention}, you have already joined the game."
+
+        self.players[player] = {"hand": self.draw_hand(), "bet": 0}
+        hand_message = f"Your hand: {self.players[player]['hand']}"
+        await self.send_hand_dm(player, hand_message)
+        return f"{player.mention} has joined the game."
+
 
     def draw_card(self):
         return random.choice(self.deck)
@@ -72,31 +80,54 @@ class BlackjackGame:
         
         hand_message = f"Your final hand: {value}"
         await self.send_hand_dm(player, hand_message)
-        if len(self.standing_players) == len(self.players):
-            return self.evaluate_winners()
-        else:
-            return f"{player.mention} stands with {value}."
 
+        if len(self.standing_players) == len(self.players):
+            self.dealer_turn()
+            winner_message = self.evaluate_winners()
+            return winner_message
+        else:
+            return f"{player.mention} stands."
+
+
+    
+    def dealer_turn(self):
+        dealer_hand_value = self.hand_value(self.dealer_hand)
+        action_message = ""
+
+        while dealer_hand_value < 17:
+            self.dealer_hand.append(self.draw_card())
+            dealer_hand_value = self.hand_value(self.dealer_hand)
+            action_message += f"Dealer draws a card: {self.dealer_hand[-1]}\n"
+        
+        action_message += f"Dealer's final hand: {self.dealer_hand} (Total: {dealer_hand_value})"
+        return action_message
+        
     def evaluate_winners(self):
-        winner_message = ""
-        highest_score = 0
-        winners = []
+        dealer_value = self.hand_value(self.dealer_hand)
+        winner_message = f"Dealer's final hand: {self.dealer_hand} (Total: {dealer_value})\n"
 
         for player, info in self.players.items():
-            hand_value = self.hand_value(info["hand"])
-            if hand_value > highest_score and hand_value <= 21:
-                winners = [player]
-                highest_score = hand_value
-            elif hand_value == highest_score:
-                winners.append(player)
+            player_value = self.hand_value(info["hand"])
+            player_message = f"{player.mention}"
 
-        if winners:
-            winner_message = "Winner: " + ", ".join([winner.mention for winner in winners]) + f" with {highest_score}!"
-        else:
-            winner_message = "No winners this round."
+            if player_value > 21:
+                player_message += "Busted\n"
+            elif dealer_value > 21:
+                if player_value <= 21:
+                    player_message += "wins (Dealer Busted)\n"
+                else:
+                    player_message += "Busted\n"
+            elif player_value > dealer_value:
+                player_message += f"wins with total {player_value}\n"
+            elif player_value == dealer_value:
+                player_message += "tied with Dealer\n"
+            else:
+                pass
+
+            winner_message += player_message
 
         self.reset_game()
-        return winner_message        
+        return winner_message
     
     def reset_game(self):
         self.players = {}
@@ -109,9 +140,33 @@ class Blackjack(commands.Cog):
         self.game = BlackjackGame()
 
     @commands.command()
-    async def start_blackjack(self, ctx):
-        response = self.game.start_game(ctx.author)
-        await ctx.send(response)
+    async def blackjack(self, ctx):
+        response = await self.game.start_game(ctx.author)
+
+        embed = Embed(title="Blackjack Game", description=response, color=0x00ff00)
+
+        hit_button = Button(label="Hit", style=discord.ButtonStyle.green)
+        stand_button = Button(label="Stand", style=discord.ButtonStyle.red)
+
+        async def hit_button_callback(interaction):
+            # Use interaction.user instead of ctx.author
+            hit_response = await self.game.hit(interaction.user)
+            embed.description = hit_response
+            await interaction.response.edit_message(embed=embed, view=view)
+
+        async def stand_button_callback(interaction):
+            # Use interaction.user instead of ctx.author
+            stand_response = await self.game.stand(interaction.user)
+            embed.description = stand_response
+            await interaction.response.edit_message(embed=embed, view=view)
+
+        hit_button.callback = hit_button_callback
+        stand_button.callback = stand_button_callback
+
+        view = View()
+        view.add_item(hit_button)
+        view.add_item(stand_button)
+        await ctx.send(embed=embed, view=view)
 
     @commands.command()
     async def join_blackjack(self, ctx):
