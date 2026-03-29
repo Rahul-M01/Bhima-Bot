@@ -7,7 +7,6 @@ import json
 class ReloadCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.data_file = '../logs/message_stats.json'  # Path to your JSON file
 
     #==================================
     #          Reloads Cogs
@@ -18,46 +17,6 @@ class ReloadCog(commands.Cog):
         for extension in list(self.bot.extensions):
             await self.bot.reload_extension(extension)
         await ctx.send('All cogs have been reloaded.')
-    
-    #==================================
-    #          Shows Stats
-    #==================================
-    @commands.command(name='userstats')
-    @commands.has_permissions(administrator=True)
-    async def user_stats(self, ctx, member: discord.Member):
-        # Load data from the file
-        try:
-            with open(self.data_file, 'r') as f:
-                data = json.load(f)
-        except FileNotFoundError:
-            await ctx.send("Data file not found.")
-            return
-
-        guild_id = str(ctx.guild.id)
-        user_id = str(member.id)
-
-        # Extract message count and word frequency for the member
-        user_message_count = data.get('user_message_count', {}).get(guild_id, {}).get(user_id, 0)
-        user_word_frequency = data.get('user_word_frequency', {}).get(guild_id, {}).get(user_id, {})
-
-        most_used_words = sorted(user_word_frequency.items(), key=lambda x: x[1], reverse=True)[:5]
-        word_stats = '\n'.join([f'{word}: {count}' for word, count in most_used_words])
-
-        # Create and send the embed
-        embed = discord.Embed(title=f"Stats for {member.display_name}", color=0x3498db)
-        embed.add_field(name="Message Count", value=user_message_count, inline=False)
-        embed.add_field(name="Most Used Words", value=word_stats or "None", inline=False)
-
-        await ctx.send(embed=embed)
-
-    @user_stats.error
-    async def user_stats_error(self, ctx, error):
-        if isinstance(error, commands.MissingPermissions):
-            await ctx.send("You do not have permission to use this command.")
-        else:
-            # Handle other types of errors if necessary
-            pass
-
 
     #==================================
     #          Mutes Members
@@ -136,7 +95,6 @@ class ReloadCog(commands.Cog):
         else:
             # Handle other types of errors if necessary
             pass
-
 
 async def setup(bot):
     await bot.add_cog(ReloadCog(bot))

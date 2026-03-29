@@ -6,8 +6,13 @@ from discord.ui import Button, View
 from discord import Embed
 
 class BlackjackGame:
+    def _build_deck(self):
+        # 4 of each: 2-9, four 10-value cards (10/J/Q/K), 1 ace (11) per suit
+        return [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11] * 4
+
     def __init__(self):
-        self.deck = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11] * 4
+        self.deck = self._build_deck()
+        random.shuffle(self.deck)
         self.players = {}
         self.in_game = False
         self.standing_players = set()
@@ -16,6 +21,8 @@ class BlackjackGame:
         if self.in_game:
             return "Game is already in progress."
         self.in_game = True
+        self.deck = self._build_deck()
+        random.shuffle(self.deck)
         self.players = {player: {"hand": self.draw_hand(), "bet": 0}}
         self.dealer_hand = self.draw_hand()
         hand_message = f"Your starting hand: {self.players[player]['hand']}"
@@ -43,7 +50,10 @@ class BlackjackGame:
 
 
     def draw_card(self):
-        return random.choice(self.deck)
+        if not self.deck:
+            self.deck = self._build_deck()
+            random.shuffle(self.deck)
+        return self.deck.pop()
 
     def draw_hand(self):
         return [self.draw_card(), self.draw_card()]
