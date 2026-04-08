@@ -93,7 +93,7 @@ class Moderation(commands.Cog):
         if member == ctx.author:
             await ctx.send("You can't mute yourself.")
             return
-        if member.top_role >= ctx.author.top_role:
+        if member.top_role > ctx.author.top_role:
             await ctx.send("You can't mute someone with an equal or higher role.")
             return
         if minutes <= 0 or minutes > 40320:  # Discord max timeout is 28 days
