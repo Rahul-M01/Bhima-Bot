@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from discord.ui import Button, View
+from discord.ui import View
 from discord import Embed
 import asyncio
 import yt_dlp
@@ -129,13 +129,13 @@ class Music(commands.Cog):
         if not ctx.author.voice:
             await ctx.send("You need to be in a voice channel first.")
             return None
+        channel = ctx.author.voice.channel
         vc = ctx.voice_client
-        if vc and vc.channel == ctx.author.voice.channel:
+        if vc and vc.is_connected() and vc.channel == channel:
             return vc
         if vc:
-            await vc.move_to(ctx.author.voice.channel)
-            return vc
-        return await ctx.author.voice.channel.connect()
+            await vc.disconnect(force=True)
+        return await channel.connect(self_deaf=True)
 
     def np_embed(self, track):
         embed = Embed(
@@ -182,6 +182,10 @@ class Music(commands.Cog):
                 return
 
         player = self.get_player(ctx.guild.id)
+        vc = ctx.voice_client
+        if not vc or not vc.is_connected():
+            await ctx.send("Voice connection dropped, try again.")
+            return
 
         if vc.is_playing() or vc.is_paused():
             player.queue.append(track)

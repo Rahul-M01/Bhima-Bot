@@ -9,7 +9,7 @@ A general-purpose Discord bot built with discord.py. Handles moderation, music, 
 **Requirements:** Python 3.10+, [FFmpeg](https://ffmpeg.org/download.html) in PATH (for music)
 
 ```bash
-git clone https://github.com/yourusername/Bhima-Bot.git
+git clone https://github.com/Rahul-M01/Bhima-Bot.git
 cd Bhima-Bot
 
 python -m venv .venv
@@ -82,6 +82,22 @@ The now-playing embed includes ⏸️ ⏭️ ⏹️ buttons for quick control.
 
 Poker deals hole cards via DM and runs full betting rounds (fold/check/bet) through flop, turn, and river.
 
+### Metals
+
+| Command | Description |
+|---|---|
+| `!metals` | Show current gold and silver prices |
+| `!setmetals #channel` | Set a channel for scheduled metals reports |
+| `!unsetmetals` | Stop metals reports in this server |
+
+### Recipes
+
+| Command | Description |
+|---|---|
+| `!recipes` | List all saved recipes |
+| `!recipe <search>` | Search for a recipe |
+| `!ask <question>` | Ask a cooking question based on your saved recipes |
+
 ### Utility
 
 | Command | Description |
@@ -101,17 +117,20 @@ The bot also posts a welcome message in `#welcome` when someone joins the server
 
 ```
 cogs/
-  blackjack.py      - Blackjack game
-  deleted_messages.py - Snipe deleted/edited messages
-  help.py           - Custom help command
-  moderation.py     - Kick, ban, mute, warn, purge, slowmode
-  music.py          - YouTube music player
-  poker.py          - Texas Hold'em
-  poll.py           - Timed polls
-  reminder.py       - Persistent reminders
-  rps.py            - Rock paper scissors
-  translate.py      - Translation
-  welcome.py        - Welcome messages
-logs/               - Persistent data (warnings, reminders) — gitignored
-main.py             - Bot entry point
+  blackjack.py        - Blackjack game
+  deleted_messages.py  - Snipe deleted/edited messages
+  help.py             - Custom help command
+  metals.py           - Gold/silver price tracker with scheduled reports
+  moderation.py       - Kick, ban, mute, warn, purge, slowmode
+  music.py            - YouTube music player
+  owner.py            - Bot owner utilities (reload, etc.)
+  poker.py            - Texas Hold'em
+  poll.py             - Timed polls
+  recipe.py           - Recipe search and cooking Q&A
+  reminder.py         - Persistent reminders
+  rps.py              - Rock paper scissors
+  translate.py        - Translation
+  welcome.py          - Welcome messages
+logs/                 - Persistent data (warnings, reminders) — gitignored
+main.py               - Bot entry point
 ```
