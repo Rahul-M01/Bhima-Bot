@@ -8,7 +8,6 @@ import os
 
 TASKS_FILE = "checklist_tasks.json"
 STATE_FILE = "checklist_state.json"
-LAST_MSG_FILE = "checklist_last_msg.json"
 UK_TZ = ZoneInfo("Europe/London")
 TARGET_GUILD = "startup"   # case-insensitive match
 TARGET_CHANNEL = "general"
@@ -49,18 +48,6 @@ def save_state(message_id: int, state: dict):
     with open(STATE_FILE, "w") as f:
         json.dump(data, f)
 
-
-def save_last_msg(channel_id: int, message_id: int):
-    with open(LAST_MSG_FILE, "w") as f:
-        json.dump({str(channel_id): message_id}, f)
-
-
-def load_last_msg(channel_id: int) -> int | None:
-    if os.path.exists(LAST_MSG_FILE):
-        with open(LAST_MSG_FILE) as f:
-            data = json.load(f)
-        return data.get(str(channel_id))
-    return None
 
 
 def is_admin(interaction: discord.Interaction) -> bool:
@@ -191,13 +178,15 @@ class WeeklyChecklistCog(commands.Cog):
         self.daily_checklist.cancel()
 
     async def post_checklist(self, channel: discord.TextChannel):
-        last_id = load_last_msg(channel.id)
-        if last_id:
-            try:
-                old_msg = await channel.fetch_message(last_id)
-                await old_msg.delete()
-            except discord.NotFound:
-                pass
+        # Find and delete any existing checklist message from the bot
+        async for msg in channel.history(limit=50):
+            if (
+                msg.author == self.bot.user
+                and msg.embeds
+                and msg.embeds[0].title == "📋 Weekly Task Checklist"
+            ):
+                await msg.delete()
+                break
 
         task_list = load_tasks()
         state = {str(i): False for i in range(len(task_list))}
@@ -210,7 +199,6 @@ class WeeklyChecklistCog(commands.Cog):
             allowed_mentions=discord.AllowedMentions(everyone=True),
         )
         save_state(msg.id, state)
-        save_last_msg(channel.id, msg.id)
 
     @tasks.loop(time=time(12, 0, tzinfo=UK_TZ))
     async def daily_checklist(self):
