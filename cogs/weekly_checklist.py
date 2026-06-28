@@ -117,15 +117,27 @@ class WeeklyChecklistCog(commands.Cog):
 
     # --- Task management commands (admin only) ---
 
-    @commands.command(name="tasks", help="Show the current checklist tasks")
+    @commands.command(name="tasks", help="Show current tasks or use '!tasks help' for commands")
     @commands.has_permissions(administrator=True)
-    async def list_tasks(self, ctx: commands.Context):
+    async def list_tasks(self, ctx: commands.Context, subcommand: str = None):
+        if subcommand and subcommand.lower() == "help":
+            embed = discord.Embed(title="📋 Checklist Commands", color=discord.Color.blurple())
+            embed.add_field(name="!tasks", value="Show all current checklist tasks with their numbers", inline=False)
+            embed.add_field(name="!addtask <text>", value="Add a new task\n*Example: `!addtask Review finances`*", inline=False)
+            embed.add_field(name="!removetask <number>", value="Remove a task by its number\n*Example: `!removetask 3`*", inline=False)
+            embed.add_field(name="!edittask <number> <text>", value="Rename an existing task\n*Example: `!edittask 2 Weekly team sync`*", inline=False)
+            embed.add_field(name="!cleartasks", value="Delete all tasks from the checklist", inline=False)
+            embed.add_field(name="!checklist", value="Post the checklist immediately (for testing)", inline=False)
+            embed.set_footer(text="The checklist auto-posts every day at 12pm UK time in #general")
+            await ctx.send(embed=embed)
+            return
+
         task_list = load_tasks()
         if not task_list:
-            await ctx.send("No tasks set. Use `!addtask <task>` to add one.")
+            await ctx.send("No tasks set. Use `!addtask <task>` to add one, or `!tasks help` for all commands.")
             return
         lines = "\n".join(f"`{i+1}.` {t}" for i, t in enumerate(task_list))
-        await ctx.send(f"**Current checklist tasks:**\n{lines}")
+        await ctx.send(f"**Current checklist tasks:**\n{lines}\n\n*Use `!tasks help` to see how to edit these.*")
 
     @commands.command(name="addtask", help="Add a task to the checklist. Usage: !addtask <task text>")
     @commands.has_permissions(administrator=True)
