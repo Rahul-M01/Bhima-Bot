@@ -54,31 +54,29 @@ def is_admin(interaction: discord.Interaction) -> bool:
 
 
 def build_embed(task_list: list[str], state: dict = None) -> discord.Embed:
-    embed = discord.Embed(
-        title="📋 Weekly Task Checklist",
-        color=discord.Color.blurple()
-    )
+    embed = discord.Embed(title="📋 Weekly Task Checklist", color=discord.Color.blurple())
     if not task_list:
-        embed.description = "*No tasks yet. Click ➕ Add Task to get started.*"
+        embed.description = "*No tasks yet — click ➕ Add Task to get started.*"
     else:
         lines = []
         for i, task in enumerate(task_list):
             done = (state or {}).get(str(i), False)
-            lines.append(f"{'✅' if done else '⬜'} {task}")
+            prefix = "✅" if done else "⬜"
+            lines.append(f"{prefix} **{i+1}.** {task}")
         embed.description = "\n".join(lines)
-    embed.set_footer(text="Click a task button to mark it complete • Admins can add/remove tasks")
+    embed.set_footer(text="Use the numbered buttons to check off tasks")
     return embed
 
 
-class TaskButton(Button):
-    def __init__(self, task_label: str, index: int, completed: bool = False):
+class ToggleButton(Button):
+    """Small numbered button that toggles a task on/off."""
+    def __init__(self, index: int, completed: bool):
         super().__init__(
             style=discord.ButtonStyle.success if completed else discord.ButtonStyle.secondary,
-            label=task_label[:80],
+            label=str(index + 1),
             custom_id=f"checklist_task_{index}",
-            row=min(index, 3),
+            row=index // 5,
         )
-        self.task_label = task_label
         self.task_index = index
         self.completed = completed
 
@@ -86,24 +84,20 @@ class TaskButton(Button):
         self.completed = not self.completed
         self.style = discord.ButtonStyle.success if self.completed else discord.ButtonStyle.secondary
 
-        task_list = load_tasks()
-        state = {}
-        for item in self.view.children:
-            if isinstance(item, TaskButton):
-                state[str(item.task_index)] = item.completed
-
+        state = {
+            str(item.task_index): item.completed
+            for item in self.view.children
+            if isinstance(item, ToggleButton)
+        }
         save_state(interaction.message.id, state)
 
+        task_list = load_tasks()
         embed = build_embed(task_list, state)
         await interaction.response.edit_message(embed=embed, view=self.view)
 
 
 class AddTaskModal(Modal, title="Add a Task"):
-    task_input = TextInput(
-        label="Task name",
-        placeholder="e.g. Send weekly report",
-        max_length=80,
-    )
+    task_input = TextInput(label="Task name", placeholder="e.g. Send weekly report", max_length=80)
 
     def __init__(self, checklist_message: discord.Message):
         super().__init__()
@@ -111,8 +105,8 @@ class AddTaskModal(Modal, title="Add a Task"):
 
     async def on_submit(self, interaction: discord.Interaction):
         task_list = load_tasks()
-        if len(task_list) >= 12:
-            await interaction.response.send_message("Maximum 12 tasks reached.", ephemeral=True)
+        if len(task_list) >= 20:
+            await interaction.response.send_message("Maximum 20 tasks reached.", ephemeral=True)
             return
         task_list.append(self.task_input.value)
         save_tasks(task_list)
@@ -126,7 +120,7 @@ class RemoveTaskSelect(Select):
     def __init__(self, task_list: list[str], checklist_message: discord.Message):
         self.checklist_message = checklist_message
         options = [
-            discord.SelectOption(label=task[:100], value=str(i))
+            discord.SelectOption(label=f"{i+1}. {task[:90]}", value=str(i))
             for i, task in enumerate(task_list)
         ]
         super().__init__(placeholder="Choose a task to remove...", options=options)
@@ -134,9 +128,6 @@ class RemoveTaskSelect(Select):
     async def callback(self, interaction: discord.Interaction):
         task_list = load_tasks()
         index = int(self.values[0])
-        if index >= len(task_list):
-            await interaction.response.send_message("Task not found.", ephemeral=True)
-            return
         removed = task_list.pop(index)
         save_tasks(task_list)
         new_view = ChecklistView(task_list=task_list)
@@ -153,12 +144,7 @@ class RemoveTaskView(View):
 
 class AddTaskButton(Button):
     def __init__(self):
-        super().__init__(
-            style=discord.ButtonStyle.primary,
-            label="➕ Add Task",
-            custom_id="checklist_add",
-            row=4,
-        )
+        super().__init__(style=discord.ButtonStyle.primary, label="➕ Add Task", custom_id="checklist_add", row=4)
 
     async def callback(self, interaction: discord.Interaction):
         if not is_admin(interaction):
@@ -169,12 +155,7 @@ class AddTaskButton(Button):
 
 class RemoveTaskButton(Button):
     def __init__(self):
-        super().__init__(
-            style=discord.ButtonStyle.danger,
-            label="🗑️ Remove Task",
-            custom_id="checklist_remove",
-            row=4,
-        )
+        super().__init__(style=discord.ButtonStyle.danger, label="🗑️ Remove Task", custom_id="checklist_remove", row=4)
 
     async def callback(self, interaction: discord.Interaction):
         if not is_admin(interaction):
@@ -184,18 +165,18 @@ class RemoveTaskButton(Button):
         if not task_list:
             await interaction.response.send_message("No tasks to remove.", ephemeral=True)
             return
-        view = RemoveTaskView(task_list, interaction.message)
-        await interaction.response.send_message("Select a task to remove:", view=view, ephemeral=True)
+        await interaction.response.send_message(
+            "Select a task to remove:", view=RemoveTaskView(task_list, interaction.message), ephemeral=True
+        )
 
 
 class ChecklistView(View):
     def __init__(self, task_list: list[str] = None, state: dict = None):
         super().__init__(timeout=None)
         tasks = task_list if task_list is not None else load_tasks()
-        # One task per row, max 4 rows (row 4 reserved for management)
-        for i, task in enumerate(tasks[:12]):
+        for i, _ in enumerate(tasks[:20]):
             completed = (state or {}).get(str(i), False)
-            self.add_item(TaskButton(task, i, completed))
+            self.add_item(ToggleButton(i, completed))
         self.add_item(AddTaskButton())
         self.add_item(RemoveTaskButton())
 
@@ -203,7 +184,6 @@ class ChecklistView(View):
 class WeeklyChecklistCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.posted_today = False
         self.daily_checklist.start()
 
     def cog_unload(self):
@@ -211,15 +191,16 @@ class WeeklyChecklistCog(commands.Cog):
 
     async def post_checklist(self, channel: discord.TextChannel):
         task_list = load_tasks()
-        view = ChecklistView(task_list=task_list)
-        embed = build_embed(task_list)
+        state = {str(i): False for i in range(len(task_list))}
+        view = ChecklistView(task_list=task_list, state=state)
+        embed = build_embed(task_list, state)
         msg = await channel.send(
             "@everyone",
             embed=embed,
             view=view,
             allowed_mentions=discord.AllowedMentions(everyone=True),
         )
-        save_state(msg.id, {str(i): False for i in range(len(task_list))})
+        save_state(msg.id, state)
 
     @tasks.loop(time=time(12, 0, tzinfo=UK_TZ))
     async def daily_checklist(self):
