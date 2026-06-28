@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands, tasks
-from discord.ui import Button, View
+from discord.ui import Button, View, Modal, TextInput, Select
 from datetime import time
 from zoneinfo import ZoneInfo
 import json
@@ -49,13 +49,58 @@ def save_state(message_id: int, state: dict):
         json.dump(data, f)
 
 
+def is_admin(interaction: discord.Interaction) -> bool:
+    return interaction.user.guild_permissions.administrator
+
+
+class AddTaskModal(Modal, title="Add a Task"):
+    task_input = TextInput(label="Task", placeholder="Enter the new task...", max_length=80)
+
+    async def on_submit(self, interaction: discord.Interaction):
+        task_list = load_tasks()
+        if len(task_list) >= 20:
+            await interaction.response.send_message("Maximum 20 tasks reached.", ephemeral=True)
+            return
+        task_list.append(self.task_input.value)
+        save_tasks(task_list)
+        new_view = ChecklistView(task_list=task_list)
+        await interaction.response.edit_message(view=new_view)
+
+
+class RemoveTaskSelect(Select):
+    def __init__(self, task_list: list[str]):
+        options = [
+            discord.SelectOption(label=f"{i+1}. {task[:80]}", value=str(i))
+            for i, task in enumerate(task_list)
+        ]
+        super().__init__(placeholder="Choose a task to remove...", options=options, custom_id="remove_task_select")
+
+    async def callback(self, interaction: discord.Interaction):
+        if not is_admin(interaction):
+            await interaction.response.send_message("Admins only.", ephemeral=True)
+            return
+        task_list = load_tasks()
+        index = int(self.values[0])
+        removed = task_list.pop(index)
+        save_tasks(task_list)
+        new_view = ChecklistView(task_list=task_list)
+        await interaction.message.edit(view=new_view)
+        await interaction.response.send_message(f"Removed: **{removed}**", ephemeral=True)
+
+
+class RemoveTaskView(View):
+    def __init__(self, task_list: list[str]):
+        super().__init__(timeout=30)
+        self.add_item(RemoveTaskSelect(task_list))
+
+
 class TaskButton(Button):
     def __init__(self, label: str, index: int, completed: bool = False):
         super().__init__(
             style=discord.ButtonStyle.success if completed else discord.ButtonStyle.secondary,
             label=f"✅ {label}" if completed else f"⬜ {label}",
             custom_id=f"checklist_task_{index}",
-            row=index // 3,
+            row=index // 4,
         )
         self.task_label = label
         self.task_index = index
@@ -66,18 +111,49 @@ class TaskButton(Button):
         self.style = discord.ButtonStyle.success if self.completed else discord.ButtonStyle.secondary
         self.label = f"✅ {self.task_label}" if self.completed else f"⬜ {self.task_label}"
 
-        state = {str(i): btn.completed for i, btn in enumerate(self.view.children)}
+        state = {str(i): btn.completed for i, btn in enumerate(self.view.children) if isinstance(btn, TaskButton)}
         save_state(interaction.message.id, state)
 
         await interaction.response.edit_message(view=self.view)
 
 
+class AddTaskButton(Button):
+    def __init__(self):
+        super().__init__(style=discord.ButtonStyle.primary, label="➕ Add Task", custom_id="checklist_add", row=4)
+
+    async def callback(self, interaction: discord.Interaction):
+        if not is_admin(interaction):
+            await interaction.response.send_message("Admins only.", ephemeral=True)
+            return
+        await interaction.response.send_modal(AddTaskModal())
+
+
+class RemoveTaskButton(Button):
+    def __init__(self):
+        super().__init__(style=discord.ButtonStyle.danger, label="🗑️ Remove Task", custom_id="checklist_remove", row=4)
+
+    async def callback(self, interaction: discord.Interaction):
+        if not is_admin(interaction):
+            await interaction.response.send_message("Admins only.", ephemeral=True)
+            return
+        task_list = load_tasks()
+        if not task_list:
+            await interaction.response.send_message("No tasks to remove.", ephemeral=True)
+            return
+        await interaction.response.send_message(
+            "Select a task to remove:", view=RemoveTaskView(task_list), ephemeral=True
+        )
+
+
 class ChecklistView(View):
     def __init__(self, task_list: list[str] = None, state: dict = None):
         super().__init__(timeout=None)
-        for i, task in enumerate(task_list or load_tasks()):
+        tasks = task_list if task_list is not None else load_tasks()
+        for i, task in enumerate(tasks):
             completed = (state or {}).get(str(i), False)
             self.add_item(TaskButton(task, i, completed))
+        self.add_item(AddTaskButton())
+        self.add_item(RemoveTaskButton())
 
 
 class WeeklyChecklistCog(commands.Cog):
@@ -92,7 +168,7 @@ class WeeklyChecklistCog(commands.Cog):
         task_list = load_tasks()
         view = ChecklistView(task_list=task_list)
         msg = await channel.send(
-            "@everyone\n## 📋 Weekly Task Checklist\nClick a button to mark a task as complete!",
+            "@everyone\n## 📋 Weekly Task Checklist\nClick a task to mark it complete!",
             view=view,
             allowed_mentions=discord.AllowedMentions(everyone=True),
         )
@@ -115,71 +191,7 @@ class WeeklyChecklistCog(commands.Cog):
     async def on_ready(self):
         self.bot.add_view(ChecklistView())
 
-    # --- Task management commands (admin only) ---
-
-    @commands.command(name="tasks", help="Show current tasks or use '!tasks help' for commands")
-    @commands.has_permissions(administrator=True)
-    async def list_tasks(self, ctx: commands.Context, subcommand: str = None):
-        if subcommand and subcommand.lower() == "help":
-            embed = discord.Embed(title="📋 Checklist Commands", color=discord.Color.blurple())
-            embed.add_field(name="!tasks", value="Show all current checklist tasks with their numbers", inline=False)
-            embed.add_field(name="!addtask <text>", value="Add a new task\n*Example: `!addtask Review finances`*", inline=False)
-            embed.add_field(name="!removetask <number>", value="Remove a task by its number\n*Example: `!removetask 3`*", inline=False)
-            embed.add_field(name="!edittask <number> <text>", value="Rename an existing task\n*Example: `!edittask 2 Weekly team sync`*", inline=False)
-            embed.add_field(name="!cleartasks", value="Delete all tasks from the checklist", inline=False)
-            embed.add_field(name="!checklist", value="Post the checklist immediately (for testing)", inline=False)
-            embed.set_footer(text="The checklist auto-posts every day at 12pm UK time in #general")
-            await ctx.send(embed=embed)
-            return
-
-        task_list = load_tasks()
-        if not task_list:
-            await ctx.send("No tasks set. Use `!addtask <task>` to add one, or `!tasks help` for all commands.")
-            return
-        lines = "\n".join(f"`{i+1}.` {t}" for i, t in enumerate(task_list))
-        await ctx.send(f"**Current checklist tasks:**\n{lines}\n\n*Use `!tasks help` to see how to edit these.*")
-
-    @commands.command(name="addtask", help="Add a task to the checklist. Usage: !addtask <task text>")
-    @commands.has_permissions(administrator=True)
-    async def add_task(self, ctx: commands.Context, *, task: str):
-        task_list = load_tasks()
-        if len(task_list) >= 25:
-            await ctx.send("Maximum 25 tasks allowed (Discord button limit).")
-            return
-        task_list.append(task)
-        save_tasks(task_list)
-        await ctx.send(f"Added task `{len(task_list)}.` **{task}**")
-
-    @commands.command(name="removetask", help="Remove a task by number. Usage: !removetask <number>")
-    @commands.has_permissions(administrator=True)
-    async def remove_task(self, ctx: commands.Context, number: int):
-        task_list = load_tasks()
-        if number < 1 or number > len(task_list):
-            await ctx.send(f"Invalid number. Pick between 1 and {len(task_list)}.")
-            return
-        removed = task_list.pop(number - 1)
-        save_tasks(task_list)
-        await ctx.send(f"Removed task: **{removed}**")
-
-    @commands.command(name="edittask", help="Edit a task by number. Usage: !edittask <number> <new text>")
-    @commands.has_permissions(administrator=True)
-    async def edit_task(self, ctx: commands.Context, number: int, *, new_text: str):
-        task_list = load_tasks()
-        if number < 1 or number > len(task_list):
-            await ctx.send(f"Invalid number. Pick between 1 and {len(task_list)}.")
-            return
-        old = task_list[number - 1]
-        task_list[number - 1] = new_text
-        save_tasks(task_list)
-        await ctx.send(f"Updated task `{number}`:\n~~{old}~~ → **{new_text}**")
-
-    @commands.command(name="cleartasks", help="Remove all checklist tasks")
-    @commands.has_permissions(administrator=True)
-    async def clear_tasks(self, ctx: commands.Context):
-        save_tasks([])
-        await ctx.send("All tasks cleared.")
-
-    @commands.command(name="checklist", help="Manually post the checklist now")
+    @commands.command(name="checklist", help="Manually post the checklist now (admin only)")
     @commands.has_permissions(administrator=True)
     async def checklist_cmd(self, ctx: commands.Context):
         await self.post_checklist(ctx.channel)
