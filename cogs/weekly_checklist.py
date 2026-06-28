@@ -8,6 +8,7 @@ import os
 
 TASKS_FILE = "checklist_tasks.json"
 STATE_FILE = "checklist_state.json"
+LAST_MSG_FILE = "checklist_last_msg.json"
 UK_TZ = ZoneInfo("Europe/London")
 TARGET_GUILD = "startup"
 TARGET_CHANNEL = "general"
@@ -53,6 +54,19 @@ def is_admin(interaction: discord.Interaction) -> bool:
     return interaction.user.guild_permissions.administrator
 
 
+def save_last_msg(channel_id: int, message_id: int):
+    with open(LAST_MSG_FILE, "w") as f:
+        json.dump({str(channel_id): message_id}, f)
+
+
+def load_last_msg(channel_id: int) -> int | None:
+    if os.path.exists(LAST_MSG_FILE):
+        with open(LAST_MSG_FILE) as f:
+            data = json.load(f)
+        return data.get(str(channel_id))
+    return None
+
+
 def build_embed(task_list: list[str], state: dict = None) -> discord.Embed:
     embed = discord.Embed(title="📋 Weekly Task Checklist", color=discord.Color.blurple())
     if not task_list:
@@ -61,10 +75,10 @@ def build_embed(task_list: list[str], state: dict = None) -> discord.Embed:
         lines = []
         for i, task in enumerate(task_list):
             done = (state or {}).get(str(i), False)
-            prefix = "✅" if done else "⬜"
-            lines.append(f"{prefix} **{i+1}.** {task}")
+            icon = "🟢" if done else "🔘"
+            lines.append(f"{icon} `{i+1}.` {task}")
         embed.description = "\n".join(lines)
-    embed.set_footer(text="Use the numbered buttons to check off tasks")
+    embed.set_footer(text="Press a number to toggle a task • 🟢 = done  🔘 = not done")
     return embed
 
 
@@ -190,6 +204,15 @@ class WeeklyChecklistCog(commands.Cog):
         self.daily_checklist.cancel()
 
     async def post_checklist(self, channel: discord.TextChannel):
+        # Delete previous checklist message if it exists
+        last_id = load_last_msg(channel.id)
+        if last_id:
+            try:
+                old_msg = await channel.fetch_message(last_id)
+                await old_msg.delete()
+            except discord.NotFound:
+                pass
+
         task_list = load_tasks()
         state = {str(i): False for i in range(len(task_list))}
         view = ChecklistView(task_list=task_list, state=state)
@@ -201,6 +224,7 @@ class WeeklyChecklistCog(commands.Cog):
             allowed_mentions=discord.AllowedMentions(everyone=True),
         )
         save_state(msg.id, state)
+        save_last_msg(channel.id, msg.id)
 
     @tasks.loop(time=time(12, 0, tzinfo=UK_TZ))
     async def daily_checklist(self):
