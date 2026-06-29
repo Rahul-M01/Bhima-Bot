@@ -1,3 +1,4 @@
+import asyncio
 import discord
 from discord.ext import commands, tasks
 from discord.ui import Button, View, Modal, TextInput
@@ -13,13 +14,9 @@ TARGET_GUILD = "startup"   # case-insensitive match
 TARGET_CHANNEL = "general"
 
 DEFAULT_TASKS = [
-    "Review weekly goals & priorities",
-    "Team standup / sync",
-    "Update project tracker / Notion",
-    "Check emails & messages",
-    "Review open pull requests / code",
-    "Follow up on blockers",
-    "Plan & prep for next week",
+    "Send email to Circo for follow up",
+    "Catch up with finance mate(Rahul) about the idea",
+    "Build 3d model of each compartment",
 ]
 
 
@@ -172,33 +169,34 @@ class ChecklistView(View):
 class WeeklyChecklistCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self._post_lock = asyncio.Lock()
         self.daily_checklist.start()
 
     def cog_unload(self):
         self.daily_checklist.cancel()
 
     async def post_checklist(self, channel: discord.TextChannel):
-        # Find and delete any existing checklist message from the bot
-        async for msg in channel.history(limit=50):
-            if (
-                msg.author == self.bot.user
-                and msg.embeds
-                and msg.embeds[0].title == "📋 Weekly Task Checklist"
-            ):
-                await msg.delete()
-                break
+        async with self._post_lock:
+            # Delete ALL existing checklist messages from the bot
+            async for msg in channel.history(limit=50):
+                if (
+                    msg.author == self.bot.user
+                    and msg.embeds
+                    and msg.embeds[0].title == "📋 Weekly Task Checklist"
+                ):
+                    await msg.delete()
 
-        task_list = load_tasks()
-        state = {str(i): False for i in range(len(task_list))}
-        view = ChecklistView(task_list=task_list, state=state)
-        embed = build_embed(task_list, state)
-        msg = await channel.send(
-            "@everyone",
-            embed=embed,
-            view=view,
-            allowed_mentions=discord.AllowedMentions(everyone=True),
-        )
-        save_state(msg.id, state)
+            task_list = load_tasks()
+            state = {str(i): False for i in range(len(task_list))}
+            view = ChecklistView(task_list=task_list, state=state)
+            embed = build_embed(task_list, state)
+            msg = await channel.send(
+                "@everyone",
+                embed=embed,
+                view=view,
+                allowed_mentions=discord.AllowedMentions(everyone=True),
+            )
+            save_state(msg.id, state)
 
     @tasks.loop(time=time(12, 0, tzinfo=UK_TZ))
     async def daily_checklist(self):
