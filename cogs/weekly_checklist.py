@@ -5,10 +5,13 @@ from discord.ui import Button, View, Modal, TextInput
 from datetime import time
 from zoneinfo import ZoneInfo
 import json
-import os
+from pathlib import Path
 
-TASKS_FILE = "checklist_tasks.json"
-STATE_FILE = "checklist_state.json"
+DATA_DIR = Path(__file__).resolve().parents[1] / 'logs'
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+TASKS_FILE = DATA_DIR / "checklist_tasks.json"
+STATE_FILE = DATA_DIR / "checklist_state.json"
 UK_TZ = ZoneInfo("Europe/London")
 TARGET_GUILD = "startup"   # case-insensitive match
 TARGET_CHANNEL = "general"
@@ -21,7 +24,7 @@ DEFAULT_TASKS = [
 
 
 def load_tasks() -> list[str]:
-    if os.path.exists(TASKS_FILE):
+    if TASKS_FILE.exists():
         with open(TASKS_FILE) as f:
             return json.load(f)
     return DEFAULT_TASKS.copy()
@@ -33,7 +36,7 @@ def save_tasks(tasks: list[str]):
 
 
 def load_all_states() -> dict:
-    if os.path.exists(STATE_FILE):
+    if STATE_FILE.exists():
         with open(STATE_FILE) as f:
             return json.load(f)
     return {}

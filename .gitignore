@@ -7,6 +7,7 @@ __pycache__/
 .idea/
 
 logs/
+cache/
 
 node_modules/
 application.yml

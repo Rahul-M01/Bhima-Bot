@@ -1,197 +1,296 @@
 import discord
 from discord.ext import commands
-import random
-import asyncio
 from discord.ui import Button, View
-from discord import Embed
+import json
+import random
+from pathlib import Path
 
-class BlackjackGame:
-    def _build_deck(self):
-        # 4 of each: 2-9, four 10-value cards (10/J/Q/K), 1 ace (11) per suit
-        return [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11] * 4
+import economy
 
-    def __init__(self):
-        self.deck = self._build_deck()
-        random.shuffle(self.deck)
-        self.players = {}
-        self.in_game = False
-        self.standing_players = set()
+LOGS_DIR = Path(__file__).resolve().parents[1] / 'logs'
+LOGS_DIR.mkdir(parents=True, exist_ok=True)
 
-    async def start_game(self, player):
-        if self.in_game:
-            return "Game is already in progress."
-        self.in_game = True
-        self.deck = self._build_deck()
-        random.shuffle(self.deck)
-        self.players = {player: {"hand": self.draw_hand(), "bet": 0}}
-        self.dealer_hand = self.draw_hand()
-        hand_message = f"Your starting hand: {self.players[player]['hand']}"
-        asyncio.create_task(self.send_hand_dm(player, hand_message))
-        return f"Game started. {player.mention}, it's your turn."
+STATS_FILE = LOGS_DIR / 'blackjack_stats.json'
+
+MIN_BET = 10
+MAX_BET = 5000
+
+RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+SUITS = ['♠', '♥', '♦', '♣']
 
 
-    async def send_hand_dm(self, player, message):
-        try:
-            await player.send(message)
-        except discord.errors.Forbidden:
-            print(f"Could not send DM to {player.name}. They might have DMs disabled.")
-
-    async def join_game(self, player):
-        if not self.in_game:
-            return "No game is currently in progress. Please start a new game first."
-
-        if player in self.players:
-            return f"{player.mention}, you have already joined the game."
-
-        self.players[player] = {"hand": self.draw_hand(), "bet": 0}
-        hand_message = f"Your hand: {self.players[player]['hand']}"
-        await self.send_hand_dm(player, hand_message)
-        return f"{player.mention} has joined the game."
+def load_stats():
+    if not STATS_FILE.exists():
+        return {}
+    try:
+        with open(STATS_FILE) as f:
+            return json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return {}
 
 
-    def draw_card(self):
-        if not self.deck:
-            self.deck = self._build_deck()
-            random.shuffle(self.deck)
-        return self.deck.pop()
+def save_stats(data):
+    with open(STATS_FILE, 'w') as f:
+        json.dump(data, f, indent=2)
 
-    def draw_hand(self):
-        return [self.draw_card(), self.draw_card()]
 
-    def hand_value(self, hand):
-        value = sum(hand)
-        if value > 21 and 11 in hand:
-            hand[hand.index(11)] = 1
-            value = sum(hand)
-        return value
+def card_value(rank):
+    if rank == 'A':
+        return 11
+    if rank in ('10', 'J', 'Q', 'K'):
+        return 10
+    return int(rank)
 
-    async def hit(self, player):
-        if player not in self.players:
-            return "You're not in the game."
 
-        player_hand = self.players[player]["hand"]
-        player_hand.append(self.draw_card())
-        value = self.hand_value(player_hand)
-        
-        hand_message = f"Your new hand: {value}"
-        await self.send_hand_dm(player, hand_message)
+def hand_value(cards):
+    """Best total with aces counted as 11 then demoted as needed."""
+    total = sum(card_value(r) for r, _ in cards)
+    aces = sum(1 for r, _ in cards if r == 'A')
+    while total > 21 and aces:
+        total -= 10
+        aces -= 1
+    return total
 
-        if value > 21:
-            return f"{player.mention} busted with {value}!"
-        return f"{player.mention} hits."
 
-    async def stand(self, player):
-        if player not in self.players:
-            return "You're not in the game."
+def fmt_cards(cards):
+    return ' '.join(f"{r}{s}" for r, s in cards)
 
-        self.standing_players.add(player)
-        player_hand = self.players[player]["hand"]
-        value = self.hand_value(player_hand)
-        
-        hand_message = f"Your final hand: {value}"
-        await self.send_hand_dm(player, hand_message)
 
-        if len(self.standing_players) == len(self.players):
-            self.dealer_turn()
-            winner_message = self.evaluate_winners()
-            return winner_message
+def resolve_outcome(player_total, player_natural, dealer_total, dealer_natural):
+    if player_natural or dealer_natural:
+        if player_natural and dealer_natural:
+            return 'push'
+        return 'player_blackjack' if player_natural else 'dealer_blackjack'
+    if player_total > 21:
+        return 'bust'
+    if dealer_total > 21:
+        return 'dealer_bust'
+    if player_total > dealer_total:
+        return 'win'
+    if player_total == dealer_total:
+        return 'push'
+    return 'lose'
+
+
+def payout_for(bet, outcome):
+    """Total chips returned to the player (stake included); 3:2 for naturals."""
+    if outcome == 'player_blackjack':
+        return bet + (bet * 3) // 2
+    if outcome in ('win', 'dealer_bust'):
+        return bet * 2
+    if outcome == 'push':
+        return bet
+    return 0
+
+
+def bump_stats(guild_id, user_id, payout, bet):
+    stats = load_stats()
+    entry = stats.setdefault(str(guild_id), {}).setdefault(str(user_id), {
+        'hands': 0, 'wins': 0, 'losses': 0, 'pushes': 0, 'net': 0, 'biggest_win': 0,
+    })
+    entry['hands'] += 1
+    net = payout - bet
+    if payout == 0:
+        entry['losses'] += 1
+    elif net == 0:
+        entry['pushes'] += 1
+    else:
+        entry['wins'] += 1
+        entry['biggest_win'] = max(entry['biggest_win'], net)
+    entry['net'] += net
+    save_stats(stats)
+    return entry
+
+
+class BlackjackView(View):
+    def __init__(self, cog, ctx, state):
+        super().__init__(timeout=60)
+        self.cog = cog
+        self.ctx = ctx
+        self.state = state
+
+    async def interaction_check(self, interaction):
+        if self.state.get('resolved'):
+            await interaction.response.send_message("This hand is already finished.", ephemeral=True)
+            return False
+        if interaction.user.id != self.state['user'].id:
+            await interaction.response.send_message("This isn't your hand.", ephemeral=True)
+            return False
+        return True
+
+    @discord.ui.button(label="Hit", style=discord.ButtonStyle.green)
+    async def hit(self, interaction, button):
+        state = self.state
+        state['cards'].append(state['deck'].pop())
+        total = hand_value(state['cards'])
+        if total >= 21:
+            await self.cog.settle(self.ctx, state)
         else:
-            return f"{player.mention} stands."
+            await interaction.response.edit_message(embed=self.cog.table_embed(state))
+            return
+        await interaction.response.edit_message(embed=state.get('embed'), view=None)
 
+    @discord.ui.button(label="Stand", style=discord.ButtonStyle.red)
+    async def stand(self, interaction, button):
+        await self.cog.settle(self.ctx, self.state)
+        await interaction.response.edit_message(embed=self.state.get('embed'), view=None)
 
-    
-    def dealer_turn(self):
-        dealer_hand_value = self.hand_value(self.dealer_hand)
-        action_message = ""
-
-        while dealer_hand_value < 17:
-            self.dealer_hand.append(self.draw_card())
-            dealer_hand_value = self.hand_value(self.dealer_hand)
-            action_message += f"Dealer draws a card: {self.dealer_hand[-1]}\n"
-        
-        action_message += f"Dealer's final hand: {self.dealer_hand} (Total: {dealer_hand_value})"
-        return action_message
-        
-    def evaluate_winners(self):
-        dealer_value = self.hand_value(self.dealer_hand)
-        winner_message = f"Dealer's final hand: {self.dealer_hand} (Total: {dealer_value})\n"
-
-        for player, info in self.players.items():
-            player_value = self.hand_value(info["hand"])
-            player_message = f"{player.mention}"
-
-            if player_value > 21:
-                player_message += "Busted\n"
-            elif dealer_value > 21:
-                if player_value <= 21:
-                    player_message += "wins (Dealer Busted)\n"
-                else:
-                    player_message += "Busted\n"
-            elif player_value > dealer_value:
-                player_message += f"wins with total {player_value}\n"
-            elif player_value == dealer_value:
-                player_message += "tied with Dealer\n"
-            else:
+    async def on_timeout(self):
+        if not self.state.get('resolved'):
+            try:
+                await self.cog.settle(self.ctx, self.state)
+                await self.ctx.channel.send(
+                    f"⏰ {self.state['user'].mention} timed out — hand auto-stood."
+                )
+            except Exception:
                 pass
 
-            winner_message += player_message
-
-        self.reset_game()
-        return winner_message
-    
-    def reset_game(self):
-        self.players = {}
-        self.standing_players = set()
-        self.in_game = False
 
 class Blackjack(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.game = BlackjackGame()
+        self.tables = {}   # channel_id -> active hand state
 
-    @commands.command()
-    async def blackjack(self, ctx):
-        response = await self.game.start_game(ctx.author)
+    def table_embed(self, state, *, reveal=False):
+        dealer = state['dealer']
+        hole = dealer if reveal else [dealer[0], ('🂠', '')]
+        color = discord.Color.green() if state.get('resolved') else discord.Color.blurple()
+        embed = Embed(title=f"Blackjack — {state['user'].display_name}", color=color)
+        embed.add_field(name="Dealer", value=fmt_cards(hole), inline=False)
+        embed.add_field(
+            name="Your Hand",
+            value=f"{fmt_cards(state['cards'])} (**{hand_value(state['cards'])}**)",
+            inline=False
+        )
+        embed.add_field(name="Bet", value=f"**{state['bet']:,}** chips", inline=True)
+        return embed
 
-        embed = Embed(title="Blackjack Game", description=response, color=0x00ff00)
+    def new_deck(self):
+        deck = [(r, s) for s in SUITS for r in RANKS]
+        random.shuffle(deck)
+        return deck
 
-        hit_button = Button(label="Hit", style=discord.ButtonStyle.green)
-        stand_button = Button(label="Stand", style=discord.ButtonStyle.red)
+    async def settle(self, ctx, state):
+        if state.get('resolved'):
+            return
+        state['resolved'] = True
+        self.tables.pop(ctx.channel.id, None)
 
-        async def hit_button_callback(interaction):
-            # Use interaction.user instead of ctx.author
-            hit_response = await self.game.hit(interaction.user)
-            embed.description = hit_response
-            await interaction.response.edit_message(embed=embed, view=view)
+        while hand_value(state['dealer']) < 17:
+            state['dealer'].append(state['deck'].pop())
 
-        async def stand_button_callback(interaction):
-            # Use interaction.user instead of ctx.author
-            stand_response = await self.game.stand(interaction.user)
-            embed.description = stand_response
-            await interaction.response.edit_message(embed=embed, view=view)
+        player_total = hand_value(state['cards'])
+        dealer_total = hand_value(state['dealer'])
+        outcome = resolve_outcome(
+            player_total, player_total == 21 and len(state['cards']) == 2,
+            dealer_total, dealer_total == 21 and len(state['dealer']) == 2,
+        )
+        payout = payout_for(state['bet'], outcome)
+        entry = bump_stats(ctx.guild.id, state['user'].id, payout, state['bet'])
+        if payout:
+            economy.add_chips(ctx.guild.id, state['user'].id, payout)
 
-        hit_button.callback = hit_button_callback
-        stand_button.callback = stand_button_callback
+        labels = {
+            'player_blackjack': '🃏 Blackjack! Paid 3:2',
+            'dealer_blackjack': '💀 Dealer blackjack',
+            'win': '✅ You win!',
+            'dealer_bust': '🎉 Dealer busts — you win!',
+            'push': '🤝 Push — bet returned',
+            'bust': '💥 Bust!',
+            'lose': '😔 Dealer wins',
+        }
+        net = payout - state['bet']
+        embed = self.table_embed(state, reveal=True)
+        embed.description = (
+            f"{labels[outcome]} {'**+' if net > 0 else ''}{f'{net:,}' if net else '0'} chips\n"
+            f"Dealer total: **{dealer_total}** | Your total: **{player_total}**\n"
+            f"Balance: **{economy.get_balance(ctx.guild.id, state['user'].id):,}** chips "
+            f"(net this session: {entry['net']:+,})"
+        )
+        state['embed'] = embed
+        await ctx.send(embed=embed)
 
-        view = View()
-        view.add_item(hit_button)
-        view.add_item(stand_button)
-        await ctx.send(embed=embed, view=view)
+    @commands.command(name='blackjack',
+                      help=f'Play blackjack against the dealer. Usage: !blackjack <amount> '
+                           f'(min {MIN_BET}). Naturals pay 3:2.')
+    async def blackjack(self, ctx, amount: int):
+        if ctx.author.bot:
+            return
+        if amount < MIN_BET:
+            await ctx.send(f"Minimum bet is **{MIN_BET}** chips.")
+            return
+        if amount > MAX_BET:
+            await ctx.send(f"Maximum bet is **{MAX_BET:,}** chips.")
+            return
+        if ctx.channel.id in self.tables:
+            await ctx.send("A hand is already running in this channel. Finish it first!")
+            return
+        if not economy.spend_chips(ctx.guild.id, ctx.author.id, amount):
+            balance = economy.get_balance(ctx.guild.id, ctx.author.id)
+            await ctx.send(f"You can't afford that bet. Balance: **{balance:,}** chips (`!daily` helps).")
+            return
 
-    @commands.command()
-    async def join_blackjack(self, ctx):
-        response = await self.game.join_game(ctx.author)
-        await ctx.send(response)
+        deck = self.new_deck()
+        state = {
+            'user': ctx.author,
+            'bet': amount,
+            'deck': deck,
+            'cards': [deck.pop(), deck.pop()],
+            'dealer': [deck.pop(), deck.pop()],
+            'resolved': False,
+        }
+        self.tables[ctx.channel.id] = state
 
-    @commands.command()
-    async def hit(self, ctx):
-        response = await self.game.hit(ctx.author)
-        await ctx.send(response)
+        player_total = hand_value(state['cards'])
+        if player_total == 21:
+            await ctx.send(embed=self.table_embed(state))
+            await self.settle(ctx, state)
+            return
 
-    @commands.command()
-    async def stand(self, ctx):
-        response = await self.game.stand(ctx.author)
-        await ctx.send(response)
+        view = BlackjackView(self, ctx, state)
+        await ctx.send(embed=self.table_embed(state), view=view)
+
+    @commands.command(name='bjtop', help='Blackjack leaderboard: biggest single wins and net profit.')
+    async def bj_top(self, ctx):
+        guild_stats = load_stats().get(str(ctx.guild.id), {})
+        if not guild_stats:
+            await ctx.send('No blackjack hands played yet. Try `!blackjack <amount>`!')
+            return
+
+        def member_name(user_id):
+            member = ctx.guild.get_member(int(user_id))
+            return member.display_name if member else f'User {user_id}'
+
+        biggest = sorted(guild_stats.items(),
+                         key=lambda kv: kv[1].get('biggest_win', 0), reverse=True)[:5]
+        profitable = sorted(guild_stats.items(),
+                            key=lambda kv: kv[1].get('net', 0), reverse=True)[:5]
+
+        def fmt(rows, key):
+            lines = []
+            for i, (uid, s) in enumerate(rows, 1):
+                if not s.get(key):
+                    continue
+                lines.append(f"`{i}.` **{member_name(uid)}** — {s[key]:+,} chips")
+            return '\n'.join(lines) or '—'
+
+        embed = Embed(title="🃏 Blackjack Leaderboard", color=0x9b59b6)
+        embed.add_field(name="💰 Biggest Single Wins", value=fmt(biggest, 'biggest_win'), inline=False)
+        embed.add_field(name="📈 Net Profit", value=fmt(profitable, 'net'), inline=False)
+        await ctx.send(embed=embed)
+
+    @blackjack.error
+    @bj_top.error
+    async def blackjack_error(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(f"Usage: `!blackjack <amount>` (min {MIN_BET} chips).")
+        elif isinstance(error, commands.BadArgument):
+            await ctx.send("Bet must be a whole number of chips.")
+        elif isinstance(error, commands.CommandInvokeError):
+            await ctx.send("Something went wrong resolving that hand — your chips are safe.")
+        else:
+            raise error
+
 
 async def setup(bot):
     await bot.add_cog(Blackjack(bot))

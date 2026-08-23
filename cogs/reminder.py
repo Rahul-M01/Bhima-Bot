@@ -5,6 +5,12 @@ import dateparser
 from datetime import datetime
 from datetime import timedelta
 import json
+from pathlib import Path
+
+LOGS_DIR = Path(__file__).resolve().parents[1] / 'logs'
+LOGS_DIR.mkdir(parents=True, exist_ok=True)
+
+REMINDERS_FILE = LOGS_DIR / 'reminders.json'
 
 class ReminderCog(commands.Cog):
     def __init__(self, bot):
@@ -14,12 +20,12 @@ class ReminderCog(commands.Cog):
         self.check_reminders.start()
 
     def save_reminders(self):
-        with open('../logs/reminders.json', 'w') as f:
+        with open(REMINDERS_FILE, 'w') as f:
             json.dump(self.reminders, f, default=str)  # Convert to string for JSON serialization
-        
+
     def load_reminders(self):
         try:
-            with open('../logs/reminders.json', 'r') as f:
+            with open(REMINDERS_FILE, 'r') as f:
                 self.reminders = json.load(f)
                 # Convert string dates back to datetime objects
                 self.reminders = [(user_id, dateparser.parse(reminder_time), message) for user_id, reminder_time, message in self.reminders]

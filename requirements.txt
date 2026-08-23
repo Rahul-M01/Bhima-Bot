@@ -5,5 +5,8 @@ PyNaCl
 dateparser
 googletrans==4.0.0rc1
 yfinance
+pandas>=2.2
+numpy>=1.26
+pyarrow
 aiohttp
 tzdata

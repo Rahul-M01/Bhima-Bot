@@ -2,12 +2,15 @@ import discord
 from discord.ext import commands
 from datetime import timedelta
 import json
-import os
+from pathlib import Path
 
-WARNINGS_FILE = '../logs/warnings.json'
+LOGS_DIR = Path(__file__).resolve().parents[1] / 'logs'
+LOGS_DIR.mkdir(parents=True, exist_ok=True)
+
+WARNINGS_FILE = LOGS_DIR / 'warnings.json'
 
 def load_warnings():
-    if not os.path.exists(WARNINGS_FILE):
+    if not WARNINGS_FILE.exists():
         return {}
     with open(WARNINGS_FILE, 'r') as f:
         return json.load(f)

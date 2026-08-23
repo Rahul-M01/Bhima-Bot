@@ -4,9 +4,12 @@ from discord import Embed
 import yfinance as yf
 from datetime import datetime, timezone, time
 import json
-import os
+import logging
+from pathlib import Path
 
-CHANNEL_FILE = '../logs/metals_config.json'
+log = logging.getLogger(__name__)
+
+CHANNEL_FILE = Path(__file__).resolve().parents[1] / 'logs' / 'metals_config.json'
 SURGE_THRESHOLD = 1.5   # % change within one check interval to trigger alert
 CHECK_INTERVAL  = 15    # minutes between surge checks
 
@@ -20,7 +23,7 @@ EVENING = time(17, 0, tzinfo=timezone.utc)
 
 
 def load_config():
-    if not os.path.exists(CHANNEL_FILE):
+    if not CHANNEL_FILE.exists():
         return {}
     with open(CHANNEL_FILE) as f:
         return json.load(f)
@@ -154,8 +157,9 @@ class Metals(commands.Cog):
         async with ctx.typing():
             try:
                 prices = fetch_prices()
-            except Exception as e:
-                await ctx.send(f"Couldn't fetch prices right now: {e}")
+            except Exception:
+                log.exception("Couldn't fetch metal prices")
+                await ctx.send("Couldn't fetch prices right now. Please try again in a moment.")
                 return
         await ctx.send(embed=build_embed(prices, "Gold & Silver"))
 

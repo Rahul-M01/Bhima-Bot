@@ -3,11 +3,13 @@ from discord.ext import commands
 from discord.ui import View
 from discord import Embed
 import asyncio
+import logging
 import yt_dlp
 
-YTDL_OPTS = {
+log = logging.getLogger(__name__)
+
+YTDL_BASE = {
     'format': 'bestaudio/best',
-    'noplaylist': True,
     'quiet': True,
     'no_warnings': True,
     'default_search': 'ytsearch',
@@ -19,7 +21,9 @@ FFMPEG_OPTS = {
     'options': '-vn',
 }
 
-ytdl = yt_dlp.YoutubeDL(YTDL_OPTS)
+ytdl = yt_dlp.YoutubeDL({**YTDL_BASE, 'noplaylist': True})
+ytdl_search = yt_dlp.YoutubeDL({**YTDL_BASE, 'noplaylist': True})
+ytdl_playlist = yt_dlp.YoutubeDL({**YTDL_BASE, 'extract_flat': 'in_playlist'})
 
 
 class Track:
@@ -35,6 +39,14 @@ class Track:
     async def from_query(cls, query, requester):
         loop = asyncio.get_event_loop()
         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(query, download=False))
+        if 'entries' in data:
+            data = data['entries'][0]
+        return cls(data, requester)
+
+    @classmethod
+    async def from_url(cls, url, requester):
+        loop = asyncio.get_event_loop()
+        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
         if 'entries' in data:
             data = data['entries'][0]
         return cls(data, requester)
@@ -112,9 +124,78 @@ class PlayerView(View):
             await interaction.response.send_message("Not connected.", ephemeral=True)
 
 
+class SearchSelect(discord.ui.Select):
+    def __init__(self, results, cog, requester):
+        self.results = results
+        self.cog = cog
+        self.requester = requester
+        options = []
+        for i, r in enumerate(results):
+            dur = r.get('duration')
+            if dur:
+                m, s = divmod(int(dur), 60)
+                desc = f"{m}:{s:02}"
+            else:
+                desc = "Unknown length"
+            label = (r.get('title') or 'Unknown')[:100]
+            options.append(discord.SelectOption(label=label, value=str(i), description=desc))
+        super().__init__(placeholder="Pick a track...", options=options)
+
+    async def callback(self, interaction):
+        idx = int(self.values[0])
+        picked = self.results[idx]
+        ctx = self.cog._search_contexts.pop(interaction.message.id, None)
+        if not ctx:
+            return await interaction.response.send_message("This search expired.", ephemeral=True)
+
+        await interaction.response.defer()
+        await interaction.message.delete()
+
+        try:
+            track = await Track.from_url(picked['url'], self.requester)
+        except Exception:
+            log.exception("Couldn't load selected search track %s", picked.get('webpage_url', ''))
+            await ctx.send("Couldn't load that track. Please try another one.")
+            return
+
+        vc = ctx.voice_client
+        if not vc or not vc.is_connected():
+            vc = await self.cog.ensure_voice(ctx)
+            if not vc:
+                return
+
+        player = self.cog.get_player(ctx.guild.id)
+        if vc.is_playing() or vc.is_paused():
+            player.queue.append(track)
+            embed = Embed(title="Added to Queue", description=f"[{track.title}]({track.webpage})", color=discord.Color.green())
+            embed.add_field(name="Position", value=str(len(player.queue)), inline=True)
+            embed.add_field(name="Duration", value=track.fmt_duration(), inline=True)
+            await ctx.send(embed=embed)
+        else:
+            player.current = track
+            source = discord.PCMVolumeTransformer(track.make_source(), volume=player.volume)
+            vc.play(source, after=lambda e: self.cog.play_next(ctx))
+            await ctx.send(embed=self.cog.np_embed(track), view=PlayerView(self.cog))
+
+
+class SearchView(View):
+    def __init__(self, results, cog, requester):
+        super().__init__(timeout=30)
+        self.add_item(SearchSelect(results, cog, requester))
+        self.message = None
+
+    async def on_timeout(self):
+        if self.message:
+            try:
+                await self.message.edit(content="Search timed out.", view=None, embed=None)
+            except Exception:
+                pass
+
+
 class Music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self._search_contexts = {}
         self.players = {}
 
     def get_player(self, guild_id):
@@ -160,25 +241,54 @@ class Music(commands.Cog):
             self.cleanup(ctx.guild.id)
             return
 
-        player.current = track
-        source = discord.PCMVolumeTransformer(track.make_source(), volume=player.volume)
-        ctx.voice_client.play(source, after=lambda e: self.play_next(ctx))
-        asyncio.run_coroutine_threadsafe(
-            ctx.send(embed=self.np_embed(track), view=PlayerView(self)),
-            self.bot.loop
-        )
+        if getattr(track, '_needs_resolve', False):
+            asyncio.run_coroutine_threadsafe(self._play_resolved(ctx, track), self.bot.loop)
+        else:
+            player.current = track
+            source = discord.PCMVolumeTransformer(track.make_source(), volume=player.volume)
+            ctx.voice_client.play(source, after=lambda e: self.play_next(ctx))
+            asyncio.run_coroutine_threadsafe(
+                ctx.send(embed=self.np_embed(track), view=PlayerView(self)),
+                self.bot.loop
+            )
 
-    @commands.command(name='play', aliases=['p'], help='Play a song. Usage: !play <url or search terms>')
+    async def _play_resolved(self, ctx, track):
+        try:
+            resolved = await Track.from_url(track.url, track.requester)
+        except Exception:
+            # skip tracks that fail to resolve
+            self.play_next(ctx)
+            return
+
+        player = self.get_player(ctx.guild.id)
+        vc = ctx.voice_client
+        if not vc or not vc.is_connected():
+            return
+
+        player.current = resolved
+        source = discord.PCMVolumeTransformer(resolved.make_source(), volume=player.volume)
+        vc.play(source, after=lambda e: self.play_next(ctx))
+        await ctx.send(embed=self.np_embed(resolved), view=PlayerView(self))
+
+    def _is_playlist_url(self, query):
+        return 'list=' in query and ('youtube.com' in query or 'youtu.be' in query)
+
+    @commands.command(name='play', aliases=['p'], help='Play a song or playlist. Usage: !play <url or search terms>')
     async def play(self, ctx, *, query: str):
         vc = await self.ensure_voice(ctx)
         if not vc:
             return
 
+        if self._is_playlist_url(query):
+            await self._play_playlist(ctx, query)
+            return
+
         async with ctx.typing():
             try:
                 track = await Track.from_query(query, ctx.author)
-            except Exception as e:
-                await ctx.send(f"Couldn't load that track: {e}")
+            except Exception:
+                log.exception("Couldn't load track for query")
+                await ctx.send("Couldn't load that track. Please try another one.")
                 return
 
         player = self.get_player(ctx.guild.id)
@@ -198,6 +308,92 @@ class Music(commands.Cog):
             source = discord.PCMVolumeTransformer(track.make_source(), volume=player.volume)
             vc.play(source, after=lambda e: self.play_next(ctx))
             await ctx.send(embed=self.np_embed(track), view=PlayerView(self))
+
+    async def _play_playlist(self, ctx, url):
+        async with ctx.typing():
+            loop = asyncio.get_event_loop()
+            try:
+                data = await loop.run_in_executor(None, lambda: ytdl_playlist.extract_info(url, download=False))
+            except Exception:
+                log.exception("Couldn't load playlist")
+                await ctx.send("Couldn't load that playlist. Please check the link and try again.")
+                return
+
+        entries = data.get('entries') or []
+        if not entries:
+            await ctx.send("That playlist is empty or couldn't be loaded.")
+            return
+
+        playlist_title = data.get('title', 'Unknown playlist')
+        player = self.get_player(ctx.guild.id)
+        vc = ctx.voice_client
+        if not vc or not vc.is_connected():
+            await ctx.send("Voice connection dropped, try again.")
+            return
+
+        # load the first track fully so we can play it right away
+        first_entry = entries[0]
+        try:
+            first_track = await Track.from_url(first_entry['url'], ctx.author)
+        except Exception:
+            await ctx.send("Couldn't load the first track from that playlist.")
+            return
+
+        if not vc.is_playing() and not vc.is_paused():
+            player.current = first_track
+            source = discord.PCMVolumeTransformer(first_track.make_source(), volume=player.volume)
+            vc.play(source, after=lambda e: self.play_next(ctx))
+            await ctx.send(embed=self.np_embed(first_track), view=PlayerView(self))
+            remaining = entries[1:]
+        else:
+            player.queue.append(first_track)
+            remaining = entries[1:]
+
+        # queue the rest as stubs, they get resolved when play_next picks them up
+        for entry in remaining:
+            stub = Track({
+                'url': entry['url'],
+                'title': entry.get('title', 'Unknown'),
+                'webpage_url': entry.get('url', ''),
+                'duration': entry.get('duration', 0),
+                'thumbnail': entry.get('thumbnails', [{}])[0].get('url', '') if entry.get('thumbnails') else '',
+            }, ctx.author)
+            stub._needs_resolve = True
+            player.queue.append(stub)
+
+        await ctx.send(f"Queued **{len(remaining)}** tracks from **{playlist_title}**.")
+
+    @commands.command(name='search', help='Search YouTube and pick a track. Usage: !search <query>')
+    async def search(self, ctx, *, query: str):
+        async with ctx.typing():
+            loop = asyncio.get_event_loop()
+            try:
+                data = await loop.run_in_executor(None, lambda: ytdl_search.extract_info(f"ytsearch5:{query}", download=False))
+            except Exception:
+                log.exception("YouTube search failed")
+                await ctx.send("Search failed. Please try again in a moment.")
+                return
+
+        results = [e for e in (data.get('entries') or []) if e]
+        if not results:
+            await ctx.send(f"No results for **{query}**.")
+            return
+
+        lines = []
+        for i, r in enumerate(results, 1):
+            dur = r.get('duration')
+            if dur:
+                m, s = divmod(int(dur), 60)
+                ts = f"`{m}:{s:02}`"
+            else:
+                ts = "`?:??`"
+            lines.append(f"`{i}.` **{r.get('title', 'Unknown')}** — {ts}")
+
+        embed = Embed(title=f"Results for \"{query}\"", description="\n".join(lines), color=discord.Color.blurple())
+        view = SearchView(results, self, ctx.author)
+        msg = await ctx.send(embed=embed, view=view)
+        view.message = msg
+        self._search_contexts[msg.id] = ctx
 
     @commands.command(name='pause', help='Pause playback.')
     async def pause(self, ctx):

@@ -1,0 +1,430 @@
+{
+  "BREAKDOWN_200": {
+    "horizon": "LONG",
+    "fees_bps_round_trip": 30.0,
+    "benchmark_buyhold_pct": 8.82,
+    "trades": 1445,
+    "win_rate": 83.3,
+    "avg_ret_pct": 0.94,
+    "adj_win_rate": 81.8,
+    "adj_avg_ret_pct": 0.74,
+    "median_ret_pct": 0.89,
+    "best_pct": 20.68,
+    "worst_pct": -8.44,
+    "avg_days_held": 1.0,
+    "target_hits_pct": 0.2,
+    "yearly": {
+      "2022": {
+        "trades": 185,
+        "win_rate": 84.3,
+        "avg_ret_pct": 0.92
+      },
+      "2023": {
+        "trades": 371,
+        "win_rate": 89.2,
+        "avg_ret_pct": 1.04
+      },
+      "2024": {
+        "trades": 292,
+        "win_rate": 81.2,
+        "avg_ret_pct": 0.81
+      },
+      "2025": {
+        "trades": 361,
+        "win_rate": 82.0,
+        "avg_ret_pct": 1.05
+      },
+      "2026": {
+        "trades": 236,
+        "win_rate": 78.0,
+        "avg_ret_pct": 0.81
+      }
+    },
+    "interpretation": "Exit advisory: win% = share of cases where downside played out"
+  },
+  "BREAKOUT_20D": {
+    "horizon": "SWING",
+    "fees_bps_round_trip": 30.0,
+    "benchmark_buyhold_pct": 1.13,
+    "trades": 1518,
+    "win_rate": 48.2,
+    "avg_ret_pct": 0.39,
+    "adj_win_rate": 46.7,
+    "adj_avg_ret_pct": 0.19,
+    "median_ret_pct": -0.51,
+    "best_pct": 31.0,
+    "worst_pct": -32.41,
+    "avg_days_held": 9.2,
+    "target_hits_pct": 29.0,
+    "yearly": {
+      "2022": {
+        "trades": 142,
+        "win_rate": 48.6,
+        "avg_ret_pct": -0.02
+      },
+      "2023": {
+        "trades": 386,
+        "win_rate": 45.3,
+        "avg_ret_pct": 0.25
+      },
+      "2024": {
+        "trades": 393,
+        "win_rate": 51.1,
+        "avg_ret_pct": 0.71
+      },
+      "2025": {
+        "trades": 381,
+        "win_rate": 48.8,
+        "avg_ret_pct": 0.46
+      },
+      "2026": {
+        "trades": 216,
+        "win_rate": 46.3,
+        "avg_ret_pct": 0.18
+      }
+    }
+  },
+  "DEATH_CROSS": {
+    "horizon": "LONG",
+    "fees_bps_round_trip": 30.0,
+    "benchmark_buyhold_pct": 8.82,
+    "trades": 351,
+    "win_rate": 83.8,
+    "avg_ret_pct": 0.81,
+    "adj_win_rate": 82.3,
+    "adj_avg_ret_pct": 0.61,
+    "median_ret_pct": 0.83,
+    "best_pct": 8.55,
+    "worst_pct": -5.03,
+    "avg_days_held": 1.0,
+    "target_hits_pct": 0.0,
+    "yearly": {
+      "2022": {
+        "trades": 39,
+        "win_rate": 74.4,
+        "avg_ret_pct": 0.88
+      },
+      "2023": {
+        "trades": 90,
+        "win_rate": 90.0,
+        "avg_ret_pct": 0.91
+      },
+      "2024": {
+        "trades": 78,
+        "win_rate": 83.3,
+        "avg_ret_pct": 0.73
+      },
+      "2025": {
+        "trades": 85,
+        "win_rate": 89.4,
+        "avg_ret_pct": 0.94
+      },
+      "2026": {
+        "trades": 59,
+        "win_rate": 72.9,
+        "avg_ret_pct": 0.53
+      }
+    },
+    "interpretation": "Exit advisory: win% = share of cases where downside played out"
+  },
+  "GOLDEN_CROSS": {
+    "horizon": "LONG",
+    "fees_bps_round_trip": 30.0,
+    "benchmark_buyhold_pct": 8.82,
+    "trades": 378,
+    "win_rate": 43.9,
+    "avg_ret_pct": 2.34,
+    "adj_win_rate": 42.4,
+    "adj_avg_ret_pct": 2.14,
+    "median_ret_pct": -5.17,
+    "best_pct": 74.42,
+    "worst_pct": -31.11,
+    "avg_days_held": 40.4,
+    "target_hits_pct": 35.7,
+    "yearly": {
+      "2022": {
+        "trades": 56,
+        "win_rate": 46.4,
+        "avg_ret_pct": 3.86
+      },
+      "2023": {
+        "trades": 106,
+        "win_rate": 38.7,
+        "avg_ret_pct": 1.05
+      },
+      "2024": {
+        "trades": 80,
+        "win_rate": 41.2,
+        "avg_ret_pct": 1.17
+      },
+      "2025": {
+        "trades": 89,
+        "win_rate": 52.8,
+        "avg_ret_pct": 5.34
+      },
+      "2026": {
+        "trades": 47,
+        "win_rate": 40.4,
+        "avg_ret_pct": -0.29
+      }
+    }
+  },
+  "MACD_CROSS_UP": {
+    "horizon": "SWING",
+    "fees_bps_round_trip": 30.0,
+    "benchmark_buyhold_pct": 1.13,
+    "trades": 1732,
+    "win_rate": 50.2,
+    "avg_ret_pct": 0.11,
+    "adj_win_rate": 48.7,
+    "adj_avg_ret_pct": -0.09,
+    "median_ret_pct": 0.05,
+    "best_pct": 30.88,
+    "worst_pct": -31.36,
+    "avg_days_held": 8.7,
+    "target_hits_pct": 36.3,
+    "yearly": {
+      "2022": {
+        "trades": 98,
+        "win_rate": 39.8,
+        "avg_ret_pct": -0.92
+      },
+      "2023": {
+        "trades": 370,
+        "win_rate": 50.5,
+        "avg_ret_pct": 0.18
+      },
+      "2024": {
+        "trades": 553,
+        "win_rate": 53.5,
+        "avg_ret_pct": 0.47
+      },
+      "2025": {
+        "trades": 463,
+        "win_rate": 51.2,
+        "avg_ret_pct": 0.16
+      },
+      "2026": {
+        "trades": 248,
+        "win_rate": 44.8,
+        "avg_ret_pct": -0.47
+      }
+    }
+  },
+  "NEW_52W_HIGH": {
+    "horizon": "LONG",
+    "fees_bps_round_trip": 30.0,
+    "benchmark_buyhold_pct": 8.82,
+    "trades": 636,
+    "win_rate": 41.4,
+    "avg_ret_pct": 2.58,
+    "adj_win_rate": 39.9,
+    "adj_avg_ret_pct": 2.38,
+    "median_ret_pct": -5.75,
+    "best_pct": 47.24,
+    "worst_pct": -20.62,
+    "avg_days_held": 40.2,
+    "target_hits_pct": 34.6,
+    "yearly": {
+      "2022": {
+        "trades": 27,
+        "win_rate": 22.2,
+        "avg_ret_pct": -3.14
+      },
+      "2023": {
+        "trades": 130,
+        "win_rate": 43.1,
+        "avg_ret_pct": 3.7
+      },
+      "2024": {
+        "trades": 197,
+        "win_rate": 41.1,
+        "avg_ret_pct": 2.33
+      },
+      "2025": {
+        "trades": 180,
+        "win_rate": 41.1,
+        "avg_ret_pct": 2.74
+      },
+      "2026": {
+        "trades": 102,
+        "win_rate": 45.1,
+        "avg_ret_pct": 2.87
+      }
+    }
+  },
+  "PULLBACK_SUPPORT": {
+    "horizon": "SWING",
+    "fees_bps_round_trip": 30.0,
+    "benchmark_buyhold_pct": 1.13,
+    "trades": 2612,
+    "win_rate": 38.1,
+    "avg_ret_pct": -0.01,
+    "adj_win_rate": 36.6,
+    "adj_avg_ret_pct": -0.21,
+    "median_ret_pct": -1.77,
+    "best_pct": 34.64,
+    "worst_pct": -27.14,
+    "avg_days_held": 7.7,
+    "target_hits_pct": 23.8,
+    "yearly": {
+      "2022": {
+        "trades": 207,
+        "win_rate": 32.9,
+        "avg_ret_pct": -0.47
+      },
+      "2023": {
+        "trades": 602,
+        "win_rate": 35.2,
+        "avg_ret_pct": -0.27
+      },
+      "2024": {
+        "trades": 751,
+        "win_rate": 41.5,
+        "avg_ret_pct": 0.21
+      },
+      "2025": {
+        "trades": 697,
+        "win_rate": 41.0,
+        "avg_ret_pct": 0.25
+      },
+      "2026": {
+        "trades": 355,
+        "win_rate": 32.7,
+        "avg_ret_pct": -0.24
+      }
+    }
+  },
+  "RSI_FADE": {
+    "horizon": "SWING",
+    "fees_bps_round_trip": 30.0,
+    "benchmark_buyhold_pct": 1.13,
+    "trades": 1756,
+    "win_rate": 85.4,
+    "avg_ret_pct": 0.87,
+    "adj_win_rate": 83.9,
+    "adj_avg_ret_pct": 0.67,
+    "median_ret_pct": 0.87,
+    "best_pct": 20.72,
+    "worst_pct": -9.03,
+    "avg_days_held": 1.0,
+    "target_hits_pct": 0.2,
+    "yearly": {
+      "2022": {
+        "trades": 129,
+        "win_rate": 86.0,
+        "avg_ret_pct": 1.0
+      },
+      "2023": {
+        "trades": 409,
+        "win_rate": 86.3,
+        "avg_ret_pct": 0.96
+      },
+      "2024": {
+        "trades": 520,
+        "win_rate": 86.7,
+        "avg_ret_pct": 0.83
+      },
+      "2025": {
+        "trades": 440,
+        "win_rate": 86.1,
+        "avg_ret_pct": 0.78
+      },
+      "2026": {
+        "trades": 258,
+        "win_rate": 79.8,
+        "avg_ret_pct": 0.93
+      }
+    },
+    "interpretation": "Exit advisory: win% = share of cases where downside played out"
+  },
+  "RSI_RECOVERY": {
+    "horizon": "SWING",
+    "fees_bps_round_trip": 30.0,
+    "benchmark_buyhold_pct": 1.13,
+    "trades": 186,
+    "win_rate": 54.3,
+    "avg_ret_pct": 0.97,
+    "adj_win_rate": 52.8,
+    "adj_avg_ret_pct": 0.77,
+    "median_ret_pct": 1.16,
+    "best_pct": 19.77,
+    "worst_pct": -13.57,
+    "avg_days_held": 9.3,
+    "target_hits_pct": 40.3,
+    "yearly": {
+      "2022": {
+        "trades": 5,
+        "win_rate": 40.0,
+        "avg_ret_pct": 0.49
+      },
+      "2023": {
+        "trades": 47,
+        "win_rate": 55.3,
+        "avg_ret_pct": 1.24
+      },
+      "2024": {
+        "trades": 46,
+        "win_rate": 63.0,
+        "avg_ret_pct": 1.79
+      },
+      "2025": {
+        "trades": 59,
+        "win_rate": 54.2,
+        "avg_ret_pct": 0.67
+      },
+      "2026": {
+        "trades": 29,
+        "win_rate": 41.4,
+        "avg_ret_pct": -0.07
+      }
+    }
+  },
+  "TREND_CONTINUATION": {
+    "horizon": "LONG",
+    "fees_bps_round_trip": 30.0,
+    "benchmark_buyhold_pct": 8.82,
+    "trades": 1020,
+    "win_rate": 56.5,
+    "avg_ret_pct": 3.54,
+    "adj_win_rate": 55.0,
+    "adj_avg_ret_pct": 3.34,
+    "median_ret_pct": 7.3,
+    "best_pct": 60.44,
+    "worst_pct": -41.41,
+    "avg_days_held": 57.2,
+    "target_hits_pct": 46.3,
+    "yearly": {
+      "2022": {
+        "trades": 35,
+        "win_rate": 34.3,
+        "avg_ret_pct": -0.24
+      },
+      "2023": {
+        "trades": 218,
+        "win_rate": 58.7,
+        "avg_ret_pct": 4.76
+      },
+      "2024": {
+        "trades": 323,
+        "win_rate": 60.4,
+        "avg_ret_pct": 3.49
+      },
+      "2025": {
+        "trades": 283,
+        "win_rate": 54.1,
+        "avg_ret_pct": 2.81
+      },
+      "2026": {
+        "trades": 161,
+        "win_rate": 54.7,
+        "avg_ret_pct": 4.13
+      }
+    }
+  },
+  "_meta": {
+    "universe_size": 150,
+    "delisted_included": [],
+    "survivorship_note": "Adjusted columns subtract a conservative haircut (-1.5pp win rate, -0.2% avg) to compensate for survivorship bias that free data cannot remove."
+  }
+}

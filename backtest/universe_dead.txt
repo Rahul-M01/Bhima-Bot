@@ -1,0 +1,4 @@
+# Delisted / renamed tickers whose history Yahoo still serves.
+# Included automatically by the backtester to reduce survivorship bias.
+# Add candidates here freely - ones without data are skipped silently.
+FISV
